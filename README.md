@@ -103,46 +103,6 @@ Storage, FCM)
 
 ---
 
-## 📁 Project Folder Structure
-
-do4U/
-├── frontend/
-│ ├── src/
-│ │ ├── components/
-│ │ ├── pages/
-│ │ ├── services/
-│ │ ├── context/
-│ │ ├── routes/
-│ │ └── utils/
-│ └── package.json
-│
-├── backend/
-│ ├── app/
-│ │ ├── core/
-│ │ ├── models/
-│ │ ├── schemas/
-│ │ ├── routes/
-│ │ ├── services/
-│ │ └── utils/
-│ └── requirements.txt
-│
-├── ai/
-│ ├── data/
-│ ├── embeddings/
-│ ├── vector_store/
-│ ├── rag/
-│ └── prompts/
-│
-├── docs/
-│ ├── architecture.md
-│ ├── api_endpoints.md
-│ ├── demo_flow.md
-│ └── future_scope.md
-│
-└── README.md
-
----
-
 ## 🧪 Demo Flow (MVP)
 
 1. User logs in and posts a favour
