@@ -105,7 +105,7 @@ Storage, FCM)
 
 ## 📁 Project Folder Structure
 
-taskgenie/
+do4U/
 ├── frontend/
 │ ├── src/
 │ │ ├── components/
@@ -155,12 +155,6 @@ taskgenie/
 
 ---
 
-## 🧠 Team Structure
-
-- **Frontend (2 members):** UI, dashboards, job flow, admin UI
-- **Backend (2 members):** APIs, Firebase integration, AI, business logic
-
----
 
 ## 🚀 Deployment
 
@@ -182,4 +176,4 @@ taskgenie/
 
 ## 📄 License
 
-This project is developed for academic purposes.
+This project is developed by sea plus plus.
