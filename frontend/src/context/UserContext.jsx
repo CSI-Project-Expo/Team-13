@@ -21,24 +21,26 @@ export const UserProvider = ({ children }) => {
     const fetchUserProfile = async () => {
       if (currentUser) {
         try {
-              const response = await userAPI.getProfile();
-              setUserProfile(response.data);
-            } catch (error) {
-              if (error.response?.status === 404) {
-                // profile not ready yet — normal during signup
-                console.warn("Profile not ready yet, retrying...");
-              } else {
-                console.error("Error fetching user profile:", error);
-              }
-            }
-
+          const response = await userAPI.getProfile();
+          setUserProfile(response.data);
+        } catch (error) {
+          if (error.response?.status === 404) {
+            // profile not ready yet — normal during signup
+            setUserProfile(null);
+          } else {
+            console.error("Error fetching user profile:", error);
+          }
+        }
       } else {
         setUserProfile(null);
       }
       setLoading(false);
     };
 
-    fetchUserProfile();
+    // Debounce: wait 300ms before fetching to allow Firestore profile creation
+    const timer = setTimeout(fetchUserProfile, 300);
+    
+    return () => clearTimeout(timer);
   }, [currentUser]);
 
   const updateUserProfile = (data) => {
