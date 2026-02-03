@@ -34,7 +34,9 @@ const Signup = () => {
     const { user, error: authError } = await registerUser(
       formData.email,
       formData.password,
-      formData.name
+      formData.name,
+      formData.role
+
     );
 
     if (authError) {

@@ -24,18 +24,21 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-      
-      // Store auth token
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // Store auth token before updating state
       if (user) {
-        user.getIdToken().then(token => {
+        try {
+          const token = await user.getIdToken(true);
           localStorage.setItem('authToken', token);
-        }).catch(err => console.error('Error getting token:', err));
+        } catch (err) {
+          console.error('Error getting token:', err);
+        }
       } else {
         localStorage.removeItem('authToken');
       }
+
+      setCurrentUser(user);
+      setLoading(false);
     });
 
     return unsubscribe;
