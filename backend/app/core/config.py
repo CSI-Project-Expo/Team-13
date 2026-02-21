@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     # Supabase Configuration
     SUPABASE_URL: str
     SUPABASE_ANON_KEY: Optional[str] = None
-    SUPABASE_JWT_PUBLIC_KEY: Optional[str] = None
     SUPABASE_SERVICE_KEY: Optional[str] = None
     
     # Application

@@ -4,14 +4,33 @@ from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import logging
+import requests
 
 from app.core.config import settings
 from app.database import get_db
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
-
 security = HTTPBearer(auto_error=False)
+
+SUPABASE_JWKS_URL = f"{settings.SUPABASE_URL}/auth/v1/.well-known/jwks.json"
+
+
+def get_public_key(token: str):
+    """Get public key from Supabase JWKS endpoint"""
+    try:
+        jwks = requests.get(SUPABASE_JWKS_URL).json()
+        headers = jwt.get_unverified_header(token)
+        kid = headers["kid"]
+
+        for key in jwks["keys"]:
+            if key["kid"] == kid:
+                return key
+
+        raise HTTPException(status_code=401, detail="Public key not found")
+    except Exception as e:
+        logger.error(f"Failed to fetch public key: {e}")
+        raise HTTPException(status_code=401, detail="Failed to fetch public key")
 
 
 async def verify_jwt_token(credentials: HTTPAuthorizationCredentials = Security(security)) -> dict:
@@ -29,11 +48,12 @@ async def verify_jwt_token(credentials: HTTPAuthorizationCredentials = Security(
         if token.startswith("Bearer "):
             token = token[7:]
         
-        # Decode JWT using Supabase public key
+        # Get public key and decode JWT
+        public_key = get_public_key(token)
         payload = jwt.decode(
             token,
-            settings.SUPABASE_JWT_PUBLIC_KEY,
-            algorithms=["RS256"],
+            public_key,
+            algorithms=["ES256"],
             audience="authenticated",
             issuer=f"https://{settings.SUPABASE_URL.replace('https://', '').split('/')[0]}/auth/v1"
         )
@@ -45,6 +65,13 @@ async def verify_jwt_token(credentials: HTTPAuthorizationCredentials = Security(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except Exception as e:
+        logger.error(f"JWT verification error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"JWT verification failed: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

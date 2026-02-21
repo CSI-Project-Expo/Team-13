@@ -63,3 +63,8 @@ else:
     print(access_token)
     print("\nUse this in Swagger as:")
     print(f"Bearer {access_token}")
+
+
+import urllib.parse
+print("\nURL Encoded Password:")
+print(urllib.parse.quote("!-@EiAd7$NLq-"))
