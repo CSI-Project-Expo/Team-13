@@ -28,9 +28,9 @@ class UserResponse(UserBase):
 
 class UserProfile(BaseModel):
     id: UUID
-    name: str
-    role: str
-    created_at: datetime
+    name: Optional[str] = None
+    role: Optional[str] = None
+    created_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -42,7 +42,7 @@ class GenieProfile(BaseModel):
     skills: Optional[List[str]] = None
     location: Optional[str] = None
     is_verified: bool = False
-    user: UserProfile
+    user: Optional[UserProfile] = None
     
     class Config:
         from_attributes = True

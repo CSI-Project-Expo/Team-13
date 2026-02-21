@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, DateTime, text, Numeric, UUID, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import ENUM
 import enum
 
 from app.database import Base
@@ -24,7 +23,7 @@ class Job(Base):
     location = Column(String, nullable=True)
     duration = Column(String, nullable=True)
     price = Column(Numeric(10, 2), nullable=True)
-    status = Column(ENUM(JobStatus), default=JobStatus.POSTED, nullable=False)
+    status = Column(String, default="POSTED", nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=text("now()"))
     
     # Relationships
