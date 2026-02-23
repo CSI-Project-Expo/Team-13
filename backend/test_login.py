@@ -13,8 +13,8 @@ print("TEST_PASSWORD:", os.getenv("TEST_PASSWORD"))
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
-TEST_EMAIL = "helloworld@gmail.com"
-TEST_PASSWORD = "helloworld"
+TEST_EMAIL = "genie1@gmail.com"
+TEST_PASSWORD = "genie1"
 
 
 
