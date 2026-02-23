@@ -58,3 +58,31 @@ async def get_me(
         "email": None,   # email lives in Supabase Auth, not our DB
         "role": user.role,
     }
+
+
+@router.patch("/me")
+async def update_me(
+    body: dict,
+    payload: dict = Depends(verify_jwt_token),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update the current user's name."""
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    new_name = (body.get("name") or "").strip()
+    if not new_name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Name cannot be empty")
+
+    user.name = new_name
+    await db.commit()
+    await db.refresh(user)
+
+    return {"id": str(user.id), "name": user.name, "role": user.role}
+

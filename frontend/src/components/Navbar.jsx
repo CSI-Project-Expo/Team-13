@@ -6,15 +6,18 @@ const NAV_LINKS = {
     user: [
         { to: '/dashboard', label: 'Dashboard' },
         { to: '/create-job', label: '+ Post Job' },
-        { to: '/wallet', label: 'Wallet' },
+        { to: '/wallet',     label: 'Wallet' },
+        { to: '/profile',    label: 'Profile' },
     ],
     genie: [
         { to: '/genie-dashboard', label: 'Dashboard' },
-        { to: '/wallet', label: 'Wallet' },
+        { to: '/wallet',          label: 'Wallet' },
+        { to: '/profile',         label: 'Profile' },
     ],
     admin: [
-        { to: '/admin', label: 'Admin' },
-        { to: '/wallet', label: 'Wallet' },
+        { to: '/admin',   label: 'Admin' },
+        { to: '/wallet',  label: 'Wallet' },
+        { to: '/profile', label: 'Profile' },
     ],
 };
 
@@ -57,10 +60,18 @@ export default function Navbar() {
                     <ThemeToggle />
                     {user && (
                         <>
-                            <span className="navbar__user">
+                            <Link to="/profile" className="navbar__user" style={{ textDecoration:'none' }}>
+                                <span style={{
+                                    width: 30, height: 30, borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, var(--accent), #8b5cf6)',
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0,
+                                }}>
+                                    {(user.name || 'U').charAt(0).toUpperCase()}
+                                </span>
                                 {user.name || user.email || 'User'}
                                 <span className="navbar__role-chip">{role}</span>
-                            </span>
+                            </Link>
                             <button className="btn btn--sm btn--ghost" onClick={handleLogout}>
                                 Logout
                             </button>
