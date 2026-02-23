@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '../services/supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import Loader from '../components/Loader';
+import ParallaxBg from '../components/ParallaxBg';
 
 export default function Login() {
     const { user, role, fetchMe } = useAuth();
@@ -115,6 +116,7 @@ export default function Login() {
 
     return (
         <div className="auth-page">
+            <ParallaxBg />
             <div className="auth-card">
                 <div className="auth-card__brand">
                     <span className="navbar__brand-icon">🚀</span>

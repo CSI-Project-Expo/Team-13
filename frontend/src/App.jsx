@@ -9,10 +9,12 @@ import GenieDashboard from './pages/GenieDashboard';
 import CreateJob from './pages/CreateJob';
 import Wallet from './pages/Wallet';
 import Admin from './pages/Admin';
+import CustomCursor from './components/CustomCursor';
 
 export default function App() {
   return (
     <BrowserRouter>
+      <CustomCursor />
       <AuthProvider>
         <Routes>
           {/* Public */}

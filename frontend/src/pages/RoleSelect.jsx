@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import ParallaxBg from '../components/ParallaxBg';
 
 const ROLES = [
     {
@@ -20,6 +21,7 @@ export default function RoleSelect() {
 
     return (
         <div className="role-select">
+            <ParallaxBg />
             <div className="role-select__card">
                 <h1 className="role-select__heading">Welcome to <span className="accent">Do4U</span></h1>
                 <p className="role-select__sub">How do you want to use the platform today?</p>
