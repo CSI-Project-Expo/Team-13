@@ -20,6 +20,7 @@ class UserUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: UUID
+    reward_points: int = 0
     created_at: datetime
     
     class Config:
@@ -30,6 +31,7 @@ class UserProfile(BaseModel):
     id: UUID
     name: Optional[str] = None
     role: Optional[str] = None
+    reward_points: Optional[int] = 0
     created_at: Optional[datetime] = None
     
     class Config:

@@ -98,7 +98,9 @@ body {
 }
 
 /* Hide native cursor globally — CustomCursor renders its own */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   cursor: none !important;
 }
 
@@ -375,12 +377,10 @@ select {
 
 /* ── Skeleton ────────────────────────────────────────────── */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--surface-2) 25%,
-    var(--border) 50%,
-    var(--surface-2) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--surface-2) 25%,
+      var(--border) 50%,
+      var(--surface-2) 75%);
   background-size: 200% 100%;
   border-radius: var(--radius-sm);
   animation: shimmer 1.4s infinite;
@@ -446,6 +446,29 @@ select {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -652,7 +675,7 @@ select {
   background: var(--surface-2);
 }
 
-.admin-table__row + .admin-table__row {
+.admin-table__row+.admin-table__row {
   border-top: 1px solid var(--border);
 }
 
@@ -765,6 +788,19 @@ select {
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.navbar__points-chip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--amber-light);
+  color: #b45309;
+  /* Darker amber for contrast */
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 
 /* ── Theme Toggle ────────────────────────────────────────── */
@@ -932,21 +968,15 @@ select {
 
   /* Animated mesh gradient */
   background:
-    radial-gradient(
-      ellipse 80% 60% at 20% 30%,
+    radial-gradient(ellipse 80% 60% at 20% 30%,
       rgba(99, 102, 241, 0.28) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 50% at 80% 80%,
+      transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%,
       rgba(139, 92, 246, 0.22) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse 70% 70% at 60% 10%,
+      transparent 55%),
+    radial-gradient(ellipse 70% 70% at 60% 10%,
       rgba(59, 130, 246, 0.18) 0%,
-      transparent 60%
-    ),
+      transparent 60%),
     var(--bg);
   animation: bgShift 12s ease-in-out infinite alternate;
 }
@@ -958,16 +988,18 @@ select {
       100% 100%,
       50% 0%;
   }
+
   50% {
     background-position:
       30% 20%,
       70% 80%,
       80% 30%;
   }
+
   100% {
     background-position:
       10% 40%,
-  90% 60%,
+      90% 60%,
       20% 100%;
   }
 }
@@ -1006,6 +1038,7 @@ select {
     opacity: 0;
     transform: translateY(28px) scale(0.97);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);

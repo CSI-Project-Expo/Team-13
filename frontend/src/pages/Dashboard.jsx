@@ -75,6 +75,11 @@ export default function Dashboard() {
                     <div>
                         <h1 className="page__title">My Jobs</h1>
                         <p className="page__subtitle">Welcome back, {user?.name || 'User'} 👋</p>
+                        {user?.reward_points > 0 && (
+                            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--amber)', fontWeight: 600 }}>
+                                ✨ You have {user.reward_points} Reward Points!
+                            </div>
+                        )}
                     </div>
                     <Link to="/create-job" className="btn btn--primary">+ Post a Job</Link>
                 </div>

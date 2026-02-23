@@ -8,7 +8,10 @@ from app.core.auth import get_current_active_user
 from app.core.roles import require_user, require_genie, require_any_role
 from app.models.user import User
 from app.models.job import JobStatus
-from app.schemas.job import JobCreate, JobUpdate, JobResponse, JobWithDetails
+from app.schemas.job import (
+    JobCreate, JobUpdate, JobResponse, JobWithDetails, 
+    UserRatingRequest, UserRatingResponse
+)
 from app.services.job_service import JobService
 from app.services.atomic_job_service import AtomicJobService
 from app.services.ai_pricing import ai_pricing_service
@@ -219,3 +222,17 @@ async def get_price_estimate_for_job(
     )
     
     return estimate
+
+
+@router.post("/{job_id}/rate-user", response_model=UserRatingResponse)
+async def rate_user(
+    job_id: UUID,
+    rating_data: UserRatingRequest,
+    current_user: User = Depends(require_genie),
+    db: AsyncSession = Depends(get_db)
+):
+    """Rate a user (only for assigned genie on completed job)"""
+    job_service = JobService(db)
+    result = await job_service.rate_user(job_id, rating_data, current_user.id)
+    return result
+
