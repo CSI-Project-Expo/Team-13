@@ -51,3 +51,15 @@ class GenieProfile(BaseModel):
 class GenieUpdate(BaseModel):
     skills: Optional[List[str]] = None
     location: Optional[str] = None
+
+
+# Used by the register endpoint — email/password are handled by Supabase on the frontend
+class RegisterRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    role: str = Field(..., pattern="^(user|genie)$")
+
+
+class RegisterResponse(BaseModel):
+    id: str
+    name: str
+    role: str

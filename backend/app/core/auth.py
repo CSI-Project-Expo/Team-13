@@ -4,7 +4,7 @@ from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import logging
-import requests
+import httpx
 
 from app.core.config import settings
 from app.database import get_db
@@ -16,10 +16,12 @@ security = HTTPBearer(auto_error=False)
 SUPABASE_JWKS_URL = f"{settings.SUPABASE_URL}/auth/v1/.well-known/jwks.json"
 
 
-def get_public_key(token: str):
+async def get_public_key(token: str):
     """Get public key from Supabase JWKS endpoint"""
     try:
-        jwks = requests.get(SUPABASE_JWKS_URL).json()
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(SUPABASE_JWKS_URL)
+            jwks = resp.json()
         headers = jwt.get_unverified_header(token)
         kid = headers["kid"]
 
@@ -28,6 +30,8 @@ def get_public_key(token: str):
                 return key
 
         raise HTTPException(status_code=401, detail="Public key not found")
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to fetch public key: {e}")
         raise HTTPException(status_code=401, detail="Failed to fetch public key")
@@ -49,7 +53,7 @@ async def verify_jwt_token(credentials: HTTPAuthorizationCredentials = Security(
             token = token[7:]
         
         # Get public key and decode JWT
-        public_key = get_public_key(token)
+        public_key = await get_public_key(token)
         payload = jwt.decode(
             token,
             public_key,

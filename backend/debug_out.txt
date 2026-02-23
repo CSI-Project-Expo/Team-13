@@ -1,0 +1,10 @@
+﻿Step 1: Supabase Admin API
+  Status: 200
+  Got ID: 9ea59923-7a2c-42a9-8f6f-a446ec631132
+Step 2: ORM insert
+  DB insert FAILED: IntegrityError: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(9ea59923-7a2c-42a9-8f6f-a446ec631132) already exists.
+[SQL: INSERT INTO users (id, name, role) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR) RETURNING users.created_at]
+[parameters: (UUID('9ea59923-7a2c-42a9-8f6f-a446ec631132'), 'DebugUser', 'user')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+  Supabase cleanup: 200
