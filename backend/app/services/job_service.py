@@ -13,7 +13,8 @@ from app.models.user import User
 from app.schemas.job import JobCreate, JobUpdate, UserRatingRequest
 from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError
 from datetime import datetime
-
+from app.schemas.job import JobCreate, JobUpdate
+from app.services.embedding_service import generate_embedding
 logger = logging.getLogger(__name__)
 
 

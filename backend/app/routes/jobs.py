@@ -233,4 +233,3 @@ async def rate_user(
     job_service = JobService(db)
     result = await job_service.rate_user(job_id, rating_data, current_user.id)
     return result
-
