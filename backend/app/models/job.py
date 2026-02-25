@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, DateTime, text, Numeric, UUID, ForeignKey
 from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
 import enum
 
 from app.database import Base
@@ -23,6 +24,10 @@ class Job(Base):
     location = Column(String, nullable=True)
     duration = Column(String, nullable=True)
     price = Column(Numeric(10, 2), nullable=True)
+
+    # 🟢 NEW COLUMN
+    embedding = Column(Vector(384), nullable=True)
+
     status = Column(String, default="POSTED", nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=text("now()"))
     
