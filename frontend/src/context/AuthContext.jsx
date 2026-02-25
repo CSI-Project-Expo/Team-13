@@ -5,25 +5,10 @@ import { api } from '../services/api';
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);   // { id, name, email, role }
+    const [user, setUser] = useState(null);   // { id, name, email, role, reward_points }
     const [role, setRole] = useState(null);
     const [token, setToken] = useState(() => localStorage.getItem('access_token'));
     const [loading, setLoading] = useState(true);
-
-    // ── Fetch /users/me and hydrate context ──────────────────────────────────
-    const fetchMe = useCallback(async (accessToken) => {
-        try {
-            localStorage.setItem('access_token', accessToken);
-            const me = await api.get('/api/v1/users/me');
-            setUser(me);
-            setRole(me.role);
-            setToken(accessToken);
-            return me;
-        } catch {
-            clearSession();
-            return null;
-        }
-    }, []);
 
     // ── Clear everything ─────────────────────────────────────────────────────
     const clearSession = useCallback(() => {
@@ -32,6 +17,24 @@ export function AuthProvider({ children }) {
         setRole(null);
         setToken(null);
     }, []);
+
+    // ── Fetch /users/me and hydrate context ──────────────────────────────────
+    const fetchMe = useCallback(async (accessToken) => {
+        const activeToken = accessToken || token || localStorage.getItem('access_token');
+        if (!activeToken) return null;
+
+        try {
+            localStorage.setItem('access_token', activeToken);
+            setToken(activeToken);
+            const me = await api.get('/api/v1/users/me');
+            setUser(me);
+            setRole(me.role);
+            return me;
+        } catch {
+            clearSession();
+            return null;
+        }
+    }, [token, clearSession]);
 
     // ── Logout ────────────────────────────────────────────────────────────────
     const logout = useCallback(async () => {

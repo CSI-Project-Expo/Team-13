@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, text
+from sqlalchemy import Column, String, DateTime, text, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -12,6 +12,7 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
     name = Column(String, nullable=False)
     role = Column(String, nullable=False, server_default="user")
+    reward_points = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=text("now()"))
     
     # Relationships

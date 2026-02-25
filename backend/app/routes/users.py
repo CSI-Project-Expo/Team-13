@@ -57,6 +57,7 @@ async def get_me(
         "name": user.name,
         "email": None,   # email lives in Supabase Auth, not our DB
         "role": user.role,
+        "reward_points": user.reward_points,
     }
 
 

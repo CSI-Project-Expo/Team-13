@@ -6,17 +6,17 @@ const NAV_LINKS = {
     user: [
         { to: '/dashboard', label: 'Dashboard' },
         { to: '/create-job', label: '+ Post Job' },
-        { to: '/wallet',     label: 'Wallet' },
-        { to: '/profile',    label: 'Profile' },
+        { to: '/wallet', label: 'Wallet' },
+        { to: '/profile', label: 'Profile' },
     ],
     genie: [
         { to: '/genie-dashboard', label: 'Dashboard' },
-        { to: '/wallet',          label: 'Wallet' },
-        { to: '/profile',         label: 'Profile' },
+        { to: '/wallet', label: 'Wallet' },
+        { to: '/profile', label: 'Profile' },
     ],
     admin: [
-        { to: '/admin',   label: 'Admin' },
-        { to: '/wallet',  label: 'Wallet' },
+        { to: '/admin', label: 'Admin' },
+        { to: '/wallet', label: 'Wallet' },
         { to: '/profile', label: 'Profile' },
     ],
 };
@@ -60,7 +60,7 @@ export default function Navbar() {
                     <ThemeToggle />
                     {user && (
                         <>
-                            <Link to="/profile" className="navbar__user" style={{ textDecoration:'none' }}>
+                            <Link to="/profile" className="navbar__user" style={{ textDecoration: 'none' }}>
                                 <span style={{
                                     width: 30, height: 30, borderRadius: '50%',
                                     background: 'linear-gradient(135deg, var(--accent), #8b5cf6)',
@@ -71,6 +71,11 @@ export default function Navbar() {
                                 </span>
                                 {user.name || user.email || 'User'}
                                 <span className="navbar__role-chip">{role}</span>
+                                {user.reward_points !== undefined && (
+                                    <span className="navbar__points-chip" title="Reward Points">
+                                        ✨ {user.reward_points}
+                                    </span>
+                                )}
                             </Link>
                             <button className="btn btn--sm btn--ghost" onClick={handleLogout}>
                                 Logout

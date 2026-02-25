@@ -44,6 +44,11 @@ class JobResponse(JobBase):
     user: Optional[UserProfile] = None
     genie: Optional[UserProfile] = None
     
+    # Rating field from Genie to User
+    genie_rating: Optional[int] = None
+    rating_comment: Optional[str] = None
+    rated_at: Optional[datetime] = None
+    
     class Config:
         from_attributes = True
 
@@ -58,3 +63,14 @@ from app.schemas.offer import OfferResponse
 from app.schemas.rating import RatingResponse
 
 JobWithDetails.model_rebuild()
+
+
+class UserRatingRequest(BaseModel):
+    rating: int = Field(..., ge=1, le=5)
+    comment: Optional[str] = Field(None, max_length=1000)
+
+
+class UserRatingResponse(BaseModel):
+    message: str
+    points_awarded: int
+    total_points: int

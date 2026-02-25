@@ -15,7 +15,7 @@ function StatCard({ label, value, sub }) {
 }
 
 export default function Wallet() {
-    const { role } = useAuth();
+    const { user, role } = useAuth();
     const [wallet, setWallet] = useState(null);
     const [loading, setLoading] = useState(true);
     const [amount, setAmount] = useState('');
@@ -102,6 +102,13 @@ export default function Wallet() {
                                 value={`₹${(Number(wallet?.balance ?? 0) + Number(wallet?.escrow_balance ?? 0)).toFixed(2)}`}
                                 sub="Combined"
                             />
+                            {user?.reward_points !== undefined && (
+                                <StatCard
+                                    label="Reward Points"
+                                    value={`✨ ${user.reward_points}`}
+                                    sub="Used for discounts"
+                                />
+                            )}
                         </div>
 
                         {/* Transaction form */}

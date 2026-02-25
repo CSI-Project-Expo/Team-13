@@ -9,9 +9,10 @@ import logging
 
 from app.models.job import Job, JobStatus
 from app.models.offer import Offer
-from app.schemas.job import JobCreate, JobUpdate
-from app.services.embedding_service import generate_embedding
+from app.models.user import User
+from app.schemas.job import JobCreate, JobUpdate, UserRatingRequest
 from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -209,3 +210,53 @@ class JobService:
         
         logger.info(f"Deleted job {job_id}")
         return True
+
+    async def rate_user(self, job_id: UUID, rating_data: UserRatingRequest, genie_id: UUID) -> dict:
+        """Rate a user after job completion and award reward points"""
+        # 1. Get job and verify
+        result = await self.db.execute(
+            select(Job)
+            .options(selectinload(Job.user))
+            .where(Job.id == job_id)
+        )
+        job = result.scalar_one_or_none()
+
+        if not job:
+            raise JobNotFoundError(f"Job {job_id} not found")
+
+        # 2. Security: Ensure only assigned genie can rate
+        if job.assigned_genie != genie_id:
+            raise InvalidJobTransitionError("Only the assigned genie can rate the user")
+
+        # 3. Security: Prevent rating before completion
+        if job.status != JobStatus.COMPLETED:
+            raise InvalidJobTransitionError("Job must be COMPLETED before rating the user")
+
+        # 4. Security: Prevent duplicate rating
+        if job.genie_rating is not None:
+            raise InvalidJobTransitionError("Job has already been rated")
+
+        # 5. Calculation: Reward logic
+        # 5 stars → 50 points, 4 stars → 30 points, 3 stars → 10 points
+        points_map = {5: 50, 4: 30, 3: 10, 2: 0, 1: 0}
+        points_awarded = points_map.get(rating_data.rating, 0)
+
+        # 6. Update Job
+        job.genie_rating = rating_data.rating
+        job.rating_comment = rating_data.comment
+        job.rated_at = datetime.now()
+
+        # 7. Update User Reward Points
+        user = job.user
+        user.reward_points += points_awarded
+
+        # 8. Commit everything in one transaction
+        await self.db.commit()
+        await self.db.refresh(user)
+
+        return {
+            "message": "Rating submitted successfully",
+            "points_awarded": points_awarded,
+            "total_points": user.reward_points
+        }
+

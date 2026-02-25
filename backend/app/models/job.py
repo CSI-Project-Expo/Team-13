@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, text, Numeric, UUID, ForeignKey
+from sqlalchemy import Column, String, DateTime, text, Numeric, UUID, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 import enum
@@ -29,6 +29,12 @@ class Job(Base):
     embedding = Column(Vector(384), nullable=True)
 
     status = Column(String, default="POSTED", nullable=False)
+    
+    # Rating field from Genie to User
+    genie_rating = Column(Integer, nullable=True)
+    rating_comment = Column(String, nullable=True)
+    rated_at = Column(DateTime(timezone=True), nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=text("now()"))
     
     # Relationships

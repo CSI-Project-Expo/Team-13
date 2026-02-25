@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import JobCard from '../components/JobCard';
 import Loader from '../components/Loader';
 import EmptyState from '../components/EmptyState';
+import RatingModal from '../components/RatingModal';
 
 function SkeletonCard() {
     return (
@@ -22,11 +23,13 @@ const TABS = [
 ];
 
 export default function GenieDashboard() {
-    const { user } = useAuth();
+    const { user, fetchMe } = useAuth();
     const [tab, setTab] = useState('available');
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionId, setActionId] = useState(null);
+    const [rateUserJob, setRateUserJob] = useState(null);
+    const [isRating, setIsRating] = useState(false);
     const [toast, setToast] = useState('');
 
     const showToast = (msg) => {
@@ -91,10 +94,29 @@ export default function GenieDashboard() {
         }
     };
 
+    const handleRateUser = async ({ rating, comment }) => {
+        setIsRating(true);
+        try {
+            const res = await api.post(`/api/v1/jobs/${rateUserJob.id}/rate-user`, { rating, comment });
+            showToast(`Rated successfully! User earned ${res.points_awarded} points.`);
+            setRateUserJob(null);
+            loadJobs();
+            // Refresh AuthContext to update points in Navbar
+            fetchMe();
+        } catch (err) {
+            showToast(`Error: ${err.message}`);
+        } finally {
+            setIsRating(false);
+        }
+    };
+
     const getAction = (job) => {
         if (tab === 'available') return { label: 'Accept Job', handler: handleAccept };
         if (job.status === 'ACCEPTED') return { label: 'Start Job', handler: handleStart };
         if (job.status === 'IN_PROGRESS') return { label: 'Mark Complete', handler: handleComplete };
+        if (job.status === 'COMPLETED' && !job.genie_rating) {
+            return { label: 'Rate User', handler: () => setRateUserJob(job) };
+        }
         return null;
     };
 
@@ -154,6 +176,15 @@ export default function GenieDashboard() {
                     </div>
                 )}
             </main>
+
+            {rateUserJob && (
+                <RatingModal
+                    job={rateUserJob}
+                    loading={isRating}
+                    onClose={() => setRateUserJob(null)}
+                    onSubmit={handleRateUser}
+                />
+            )}
 
             {toast && <div className="toast">{toast}</div>}
         </div>
