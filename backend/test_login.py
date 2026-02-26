@@ -66,5 +66,3 @@ else:
 
 
 import urllib.parse
-print("\nURL Encoded Password:")
-print(urllib.parse.quote("!-@EiAd7$NLq-"))
