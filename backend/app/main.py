@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import logging
 
 from app.database import init_db
-from app.routes import jobs, offers, wallet, admin, users
+from app.routes import jobs, offers, wallet, admin, users, notifications
 from app.utils.exceptions import BaseAPIException
 
 
@@ -78,6 +78,7 @@ app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["jobs"])
 app.include_router(offers.router, prefix="/api/v1/offers", tags=["offers"])
 app.include_router(wallet.router, prefix="/api/v1/wallet", tags=["wallet"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
+app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["notifications"])
 
 
 @app.get("/")

@@ -58,11 +58,21 @@ export default function GenieDashboard() {
     const handleAccept = async (job) => {
         setActionId(job.id);
         try {
-            await api.post(`/api/v1/jobs/${job.id}/accept`, {});
-            showToast('Job accepted! It has been assigned to you.');
+            // Use PATCH method for job acceptance with wallet validation
+            const result = await api.patch(`/api/v1/jobs/${job.id}/accept`, {});
+            showToast(
+                `Job accepted! ₹${result.escrow_amount} moved to escrow. User wallet balance: ₹${result.user_wallet_balance}`
+            );
             loadJobs();
         } catch (err) {
-            showToast(`Error: ${err.message}`);
+            // Handle specific error cases
+            if (err.status === 400 && err.message?.includes('Insufficient')) {
+                showToast(`Cannot accept: User has insufficient wallet balance for this job.`);
+            } else if (err.status === 409) {
+                showToast(`Job already assigned to another genie.`);
+            } else {
+                showToast(`Error: ${err.message}`);
+            }
         } finally {
             setActionId(null);
         }

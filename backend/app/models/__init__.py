@@ -5,6 +5,7 @@ from app.models.offer import Offer
 from app.models.wallet import Wallet
 from app.models.rating import Rating
 from app.models.complaint import Complaint, ComplaintStatus
+from app.models.notification import Notification
 
 __all__ = [
     "User",
@@ -15,5 +16,6 @@ __all__ = [
     "Wallet",
     "Rating",
     "Complaint",
-    "ComplaintStatus"
+    "ComplaintStatus",
+    "Notification"
 ]

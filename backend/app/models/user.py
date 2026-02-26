@@ -24,3 +24,4 @@ class User(Base):
     given_ratings = relationship("Rating", foreign_keys="Rating.reviewer_id", back_populates="reviewer")
     received_ratings = relationship("Rating", foreign_keys="Rating.reviewee_id", back_populates="reviewee")
     complaints_filed = relationship("Complaint", foreign_keys="Complaint.complainant_id", back_populates="complainant")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")

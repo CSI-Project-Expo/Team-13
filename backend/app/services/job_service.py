@@ -11,10 +11,13 @@ from app.models.job import Job, JobStatus
 from app.models.offer import Offer
 from app.models.user import User
 from app.schemas.job import JobCreate, JobUpdate, UserRatingRequest
-from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError
+from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError, InsufficientFundsError
 from datetime import datetime
 from app.schemas.job import JobCreate, JobUpdate
 from app.services.embedding_service import generate_embedding
+from app.services.wallet_service import WalletService
+from app.services.notification_service import NotificationService
+from app.models.wallet import Wallet
 logger = logging.getLogger(__name__)
 
 
@@ -212,8 +215,119 @@ class JobService:
         logger.info(f"Deleted job {job_id}")
         return True
 
+    async def accept_job(
+        self,
+        job_id: UUID,
+        genie_id: UUID,
+        genie_role: str
+    ) -> dict:
+        """
+        Accept a job by a genie with wallet validation and escrow transfer.
+        All operations happen in a single atomic transaction.
+        """
+        # 1. Verify genie role
+        if genie_role not in ["genie", "admin"]:
+            raise InvalidJobTransitionError("Only genies can accept jobs")
+        
+        # 2. Get job with user and wallet info
+        result = await self.db.execute(
+            select(Job)
+            .options(
+                selectinload(Job.user).selectinload(User.wallet)
+            )
+            .where(Job.id == job_id)
+        )
+        job = result.scalar_one_or_none()
+        
+        if not job:
+            raise JobNotFoundError(f"Job {job_id} not found")
+        
+        # 3. Verify job status is POSTED
+        if job.status != JobStatus.POSTED:
+            raise InvalidJobTransitionError(
+                f"Job must be in POSTED status to accept. Current status: {job.status}"
+            )
+        
+        # 4. Check if job is already assigned
+        if job.assigned_genie is not None:
+            raise JobAlreadyAssignedError("Job has already been assigned to another genie")
+        
+        # 5. Check if job has a price
+        if job.price is None or job.price <= 0:
+            raise InvalidJobTransitionError("Job must have a valid price to be accepted")
+        
+        # 6. Get user wallet
+        user = job.user
+        if not user or not user.wallet:
+            raise InvalidJobTransitionError("Job poster does not have a wallet")
+        
+        wallet = user.wallet
+        job_price = job.price
+        
+        # 7. Validate wallet balance
+        if wallet.balance < job_price:
+            raise InsufficientFundsError(
+                f"Insufficient wallet balance. Available: ₹{wallet.balance}, Required: ₹{job_price}"
+            )
+        
+        # 8. Perform atomic operations
+        try:
+            # Lock wallet row for update (prevent race conditions)
+            wallet_result = await self.db.execute(
+                select(Wallet).where(Wallet.user_id == user.id).with_for_update()
+            )
+            locked_wallet = wallet_result.scalar_one()
+            
+            # Double-check balance after locking
+            if locked_wallet.balance < job_price:
+                raise InsufficientFundsError(
+                    f"Insufficient wallet balance. Available: ₹{locked_wallet.balance}, Required: ₹{job_price}"
+                )
+            
+            # Deduct from balance and add to escrow
+            locked_wallet.balance -= job_price
+            locked_wallet.escrow_balance += job_price
+            
+            # Assign genie to job
+            job.assigned_genie = genie_id
+            job.status = JobStatus.ACCEPTED
+            
+            # Flush changes to DB
+            await self.db.flush()
+            
+            logger.info(
+                f"Job {job_id} accepted by genie {genie_id}. "
+                f"Escrow: ₹{job_price} from user {user.id}"
+            )
+            
+            # 9. Create notification for user (after main transaction flush)
+            notification_service = NotificationService(self.db)
+            await notification_service.create_notification(
+                user_id=user.id,
+                title="Your job has been accepted",
+                message=f"Your job '{job.title}' has been accepted by a Genie. ₹{job_price} has been moved to escrow."
+            )
+            
+            # Commit all changes
+            await self.db.commit()
+            await self.db.refresh(job)
+            await self.db.refresh(locked_wallet)
+            
+            return {
+                "message": "Job accepted successfully",
+                "escrow_amount": float(job_price),
+                "user_wallet_balance": float(locked_wallet.balance)
+            }
+            
+        except InsufficientFundsError:
+            await self.db.rollback()
+            raise
+        except Exception as e:
+            await self.db.rollback()
+            logger.error(f"Failed to accept job {job_id}: {e}")
+            raise InvalidJobTransitionError(f"Failed to accept job: {str(e)}")
+
     async def rate_user(self, job_id: UUID, rating_data: UserRatingRequest, genie_id: UUID) -> dict:
-        """Rate a user after job completion and award reward points"""
         # 1. Get job and verify
         result = await self.db.execute(
             select(Job)

@@ -119,20 +119,44 @@ async def delete_job(
     await job_service.delete_job(job_id, current_user.id)
 
 
-@router.post("/{job_id}/accept", response_model=JobResponse)
+@router.patch("/{job_id}/accept")
 async def accept_job(
     job_id: UUID,
     current_user: User = Depends(require_genie),
     db: AsyncSession = Depends(get_db)
 ):
-    """Accept a job (atomic operation)"""
-    atomic_service = AtomicJobService(db)
-    job = await atomic_service.accept_job_atomically(job_id, current_user.id)
+    """
+    Accept a job with wallet validation and escrow transfer.
     
-    # Load relationships for response
+    - Verifies job is POSTED
+    - Validates user has sufficient wallet balance
+    - Transfers job price from user balance to escrow
+    - Creates notification for job owner
+    """
     job_service = JobService(db)
-    job = await job_service.get_job_by_id(job.id)
-    return job
+    
+    try:
+        result = await job_service.accept_job(
+            job_id=job_id,
+            genie_id=current_user.id,
+            genie_role=current_user.role
+        )
+        return result
+    except Exception as e:
+        # Convert service exceptions to HTTP exceptions
+        from app.utils.exceptions import (
+            JobNotFoundError, InvalidJobTransitionError, 
+            JobAlreadyAssignedError, InsufficientFundsError
+        )
+        
+        if isinstance(e, JobNotFoundError):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        elif isinstance(e, (InvalidJobTransitionError, InsufficientFundsError)):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        elif isinstance(e, JobAlreadyAssignedError):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.post("/{job_id}/start", response_model=JobResponse)
