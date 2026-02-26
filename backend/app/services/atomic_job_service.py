@@ -3,9 +3,11 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from typing import Optional
 from uuid import UUID
+import asyncio
 import logging
 
 from app.models.job import Job, JobStatus
+from app.services.embedding_service import generate_embedding
 from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError
 
 logger = logging.getLogger(__name__)
@@ -120,6 +122,10 @@ class AtomicJobService:
             
             # Update status
             job.status = JobStatus.COMPLETED
+
+            if job.embedding is None:
+                combined_text = f"{job.title} {job.description} {job.location or ''}".strip()
+                job.embedding = await asyncio.to_thread(generate_embedding, combined_text)
             
             await self.db.commit()
             await self.db.refresh(job)

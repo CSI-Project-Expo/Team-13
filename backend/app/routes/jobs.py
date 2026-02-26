@@ -15,6 +15,8 @@ from app.schemas.job import (
 from app.services.job_service import JobService
 from app.services.atomic_job_service import AtomicJobService
 from app.services.ai_pricing import ai_pricing_service
+from app.services.rag_pricing_service import suggest_price
+
 
 router = APIRouter()
 
@@ -187,38 +189,34 @@ async def get_price_estimate(
     current_user: User = Depends(require_any_role),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get AI-powered price estimate for a job"""
     job_service = JobService(db)
     job = await job_service.get_job_by_id(job_id)
-    
+
     if not job:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Job not found"
         )
-    
-    # Generate price estimate
-    estimate = ai_pricing_service.estimate_price(
+
+    return await suggest_price(
+        db,
         title=job.title,
         description=job.description,
-        location=job.location,
-        duration=job.duration
+        location=job.location
     )
-    
-    return estimate
 
 
 @router.post("/price-estimate")
 async def get_price_estimate_for_job(
     job_data: JobCreate,
-    current_user: User = Depends(require_any_role)
+    current_user: User = Depends(require_any_role),
+    db: AsyncSession = Depends(get_db)
 ):
-    """Get AI-powered price estimate for a job before creating it"""
-    estimate = ai_pricing_service.estimate_price(
+    return await suggest_price(
+        db,
         title=job_data.title,
         description=job_data.description,
-        location=job_data.location,
-        duration=job_data.duration
+        location=job_data.location
     )
     
     return estimate
@@ -235,4 +233,3 @@ async def rate_user(
     job_service = JobService(db)
     result = await job_service.rate_user(job_id, rating_data, current_user.id)
     return result
-
