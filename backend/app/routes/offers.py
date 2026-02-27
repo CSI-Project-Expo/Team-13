@@ -68,12 +68,16 @@ class OfferService:
         await self.db.refresh(offer)
         
         # Notify job owner about new offer
-        notification_service = NotificationService(self.db)
-        await notification_service.create_notification(
-            user_id=job.user_id,
-            title="New offer received",
-            message=f"A Genie has made an offer of ₹{offer_data.offer_price} for your job '{job.title}'."
-        )
+        try:
+            notification_service = NotificationService(self.db)
+            await notification_service.create_notification(
+                user_id=job.user_id,
+                title="New offer received",
+                message=f"A Genie has made an offer of ₹{offer_data.offer_price} for your job '{job.title}'."
+            )
+            await self.db.commit()
+        except Exception as notification_error:
+            await self.db.rollback()
         
         # Load relationships for response
         result = await self.db.execute(

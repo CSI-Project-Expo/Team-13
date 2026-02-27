@@ -8,6 +8,7 @@ import logging
 
 from app.models.job import Job, JobStatus
 from app.services.notification_service import NotificationService
+from app.services.wallet_service import WalletService
 from app.services.embedding_service import generate_embedding
 from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError
 
@@ -90,12 +91,19 @@ class AtomicJobService:
             await self.db.refresh(job)
             
             # Notify job owner
-            notification_service = NotificationService(self.db)
-            await notification_service.create_notification(
-                user_id=job.user_id,
-                title="Your job has started",
-                message=f"A Genie has started working on your job '{job.title}'."
-            )
+            try:
+                notification_service = NotificationService(self.db)
+                await notification_service.create_notification(
+                    user_id=job.user_id,
+                    title="Your job has started",
+                    message=f"A Genie has started working on your job '{job.title}'."
+                )
+                await self.db.commit()
+            except Exception as notification_error:
+                await self.db.rollback()
+                logger.warning(
+                    f"Job {job_id} start succeeded but owner notification failed: {notification_error}"
+                )
             
             logger.info(f"Genie {genie_id} started job {job_id} atomically")
             return job
@@ -128,6 +136,11 @@ class AtomicJobService:
                 raise JobAlreadyAssignedError(
                     f"Job {job_id} is not assigned to genie {genie_id}"
                 )
+
+            if job.price is None or job.price <= 0:
+                raise InvalidJobTransitionError(
+                    f"Job {job_id} has invalid price for payout"
+                )
             
             # Update status
             job.status = JobStatus.COMPLETED
@@ -135,17 +148,31 @@ class AtomicJobService:
             if job.embedding is None:
                 combined_text = f"{job.title} {job.description} {job.location or ''}".strip()
                 job.embedding = await asyncio.to_thread(generate_embedding, combined_text)
-            
-            await self.db.commit()
+
+            # Release escrow to genie as part of completion flow
+            wallet_service = WalletService(self.db)
+            await wallet_service.transfer_escrow_to_genie_atomically(
+                from_user_id=job.user_id,
+                to_genie_id=genie_id,
+                amount=job.price
+            )
+
             await self.db.refresh(job)
             
             # Notify job owner
-            notification_service = NotificationService(self.db)
-            await notification_service.create_notification(
-                user_id=job.user_id,
-                title="Your job is complete",
-                message=f"Your job '{job.title}' has been completed by the Genie. Please review and release payment."
-            )
+            try:
+                notification_service = NotificationService(self.db)
+                await notification_service.create_notification(
+                    user_id=job.user_id,
+                    title="Job completed and payment released",
+                    message=f"Your job '{job.title}' is complete. ₹{job.price} has been released from escrow to the Genie."
+                )
+                await self.db.commit()
+            except Exception as notification_error:
+                await self.db.rollback()
+                logger.warning(
+                    f"Job {job_id} completion succeeded but owner notification failed: {notification_error}"
+                )
             
             logger.info(f"Genie {genie_id} completed job {job_id} atomically")
             return job

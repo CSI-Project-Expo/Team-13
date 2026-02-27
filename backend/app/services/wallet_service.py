@@ -209,12 +209,19 @@ class WalletService:
             await self.db.refresh(genie_wallet)
             
             # Notify genie about payment received
-            notification_service = NotificationService(self.db)
-            await notification_service.create_notification(
-                user_id=to_genie_id,
-                title="Payment received",
-                message=f"You have received ₹{amount} in your wallet from a completed job."
-            )
+            try:
+                notification_service = NotificationService(self.db)
+                await notification_service.create_notification(
+                    user_id=to_genie_id,
+                    title="Payment received",
+                    message=f"You have received ₹{amount} in your wallet from a completed job."
+                )
+                await self.db.commit()
+            except Exception as notification_error:
+                await self.db.rollback()
+                logger.warning(
+                    f"Wallet transfer completed but notification failed for genie {to_genie_id}: {notification_error}"
+                )
             
             logger.info(f"Transferred {amount} from user {from_user_id} escrow to genie {to_genie_id} balance")
             

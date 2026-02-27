@@ -314,12 +314,19 @@ class JobService:
             
             # Check for low balance and notify user
             if locked_wallet.balance < 500:  # Threshold: ₹500
-                notification_service = NotificationService(self.db)
-                await notification_service.create_notification(
-                    user_id=user.id,
-                    title="Low wallet balance",
-                    message=f"Your wallet balance is low (₹{locked_wallet.balance}). Please add funds to continue posting jobs."
-                )
+                try:
+                    notification_service = NotificationService(self.db)
+                    await notification_service.create_notification(
+                        user_id=user.id,
+                        title="Low wallet balance",
+                        message=f"Your wallet balance is low (₹{locked_wallet.balance}). Please add funds to continue posting jobs."
+                    )
+                    await self.db.commit()
+                except Exception as notification_error:
+                    await self.db.rollback()
+                    logger.warning(
+                        f"Job {job_id} accepted but low-balance notification failed for user {user.id}: {notification_error}"
+                    )
             
             return {
                 "message": "Job accepted successfully",
@@ -379,11 +386,18 @@ class JobService:
         
         # 9. Notify user about rating received
         notification_service = NotificationService(self.db)
-        await notification_service.create_notification(
-            user_id=user.id,
-            title="You received a rating",
-            message=f"A Genie rated you {rating_data.rating} stars for job '{job.title}'. You earned {points_awarded} reward points!"
-        )
+        try:
+            await notification_service.create_notification(
+                user_id=user.id,
+                title="You received a rating",
+                message=f"A Genie rated you {rating_data.rating} stars for job '{job.title}'. You earned {points_awarded} reward points!"
+            )
+            await self.db.commit()
+        except Exception as notification_error:
+            await self.db.rollback()
+            logger.warning(
+                f"Rating saved for job {job_id} but notification failed for user {user.id}: {notification_error}"
+            )
 
         return {
             "message": "Rating submitted successfully",
