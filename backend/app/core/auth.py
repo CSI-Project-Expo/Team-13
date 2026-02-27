@@ -108,3 +108,43 @@ async def get_current_user(
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     """Get current active user"""
     return current_user
+
+
+def verify_token(token: str) -> dict:
+    """Synchronous token verification for WebSocket (no async context)"""
+    import httpx
+    from jose import jwt
+    
+    try:
+        # Get JWKS
+        resp = httpx.get(SUPABASE_JWKS_URL, timeout=10.0)
+        jwks = resp.json()
+        headers = jwt.get_unverified_header(token)
+        kid = headers["kid"]
+        
+        public_key = None
+        for key in jwks["keys"]:
+            if key["kid"] == kid:
+                public_key = key
+                break
+        
+        if not public_key:
+            raise ValueError("Public key not found")
+        
+        # Decode JWT
+        payload = jwt.decode(
+            token,
+            public_key,
+            algorithms=["ES256"],
+            audience="authenticated",
+            issuer=f"https://{settings.SUPABASE_URL.replace('https://', '').split('/')[0]}/auth/v1"
+        )
+        
+        return payload
+    except Exception as e:
+        logger.error(f"Token verification failed: {e}")
+        raise ValueError("Invalid token")
+
+
+# For REST endpoints that need current user
+get_current_user_ws = get_current_user
