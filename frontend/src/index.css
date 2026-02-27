@@ -1,6 +1,7 @@
 /* ============================================================
-   Do4U — Neo Brutalism Design System
-   Bold borders · Hard shadows · Vivid colors · Raw aesthetic
+   Do4U — Design System
+   Clean, professional startup feel.
+   Indigo accent · Light/Dark · 300ms transitions
    ============================================================ */
 
 /* ── Google Font ─────────────────────────────────────────── */
@@ -106,13 +107,6 @@ body {
     background 0.2s ease,
     color 0.2s ease;
   min-height: 100vh;
-}
-
-/* Hide native cursor globally — CustomCursor renders its own */
-*,
-*::before,
-*::after {
-  cursor: none !important;
 }
 
 a {

@@ -11,12 +11,10 @@ import CreateJob from './pages/CreateJob';
 import Wallet from './pages/Wallet';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
-import CustomCursor from './components/CustomCursor';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <CustomCursor />
       <AuthProvider>
         <NotificationProvider>
           <Routes>
