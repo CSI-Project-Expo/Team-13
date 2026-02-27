@@ -235,6 +235,13 @@ export default function Profile() {
                                         Since {memberSince}
                                     </span>
                                 )}
+                                {role === 'genie' && user?.is_verified && (
+                                    <span style={{ background:'var(--neo-green)', borderRadius:'var(--radius-sm)',
+                                        padding:'4px 14px', fontSize:12, fontWeight:700, letterSpacing:'0.04em',
+                                        textTransform:'uppercase', border:'2px solid var(--border)' }}>
+                                        ✅ Verified
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>

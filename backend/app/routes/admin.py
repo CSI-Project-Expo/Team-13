@@ -14,11 +14,143 @@ from app.models.offer import Offer
 from app.models.wallet import Wallet
 from app.models.rating import Rating
 from app.models.complaint import Complaint, ComplaintStatus
+from app.models.genie import Genie
+from app.models.notification import Notification
 from app.schemas.user import UserResponse, UserProfile
 from app.schemas.job import JobResponse
 from app.schemas.complaint import ComplaintResponse
 
 router = APIRouter()
+
+
+@router.get("/verifications/pending")
+async def get_pending_genie_verifications(
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all pending verification requests for GENIE users (admin only)."""
+    query = (
+        select(User, Genie)
+        .join(Genie, Genie.id == User.id)
+        .where(func.lower(User.role) == "genie")
+        .where(func.upper(func.coalesce(Genie.verification_status, "")) == "PENDING")
+        .order_by(User.created_at.desc())
+    )
+
+    result = await db.execute(query)
+    rows = result.all()
+
+    return [
+        {
+            "user_id": str(user.id),
+            "name": user.name,
+            "role": user.role,
+            "document_path": genie.document_path,
+            "skills": genie.skills or [],
+            "skill_proofs": genie.skill_proofs,
+            "verification_status": genie.verification_status,
+            "is_verified": genie.is_verified,
+        }
+        for user, genie in rows
+    ]
+
+
+@router.post("/verifications/{genie_user_id}/approve")
+async def approve_genie_verification(
+    genie_user_id: UUID,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Approve a GENIE verification request (admin only)."""
+    result = await db.execute(
+        select(User, Genie)
+        .join(Genie, Genie.id == User.id)
+        .where(User.id == genie_user_id)
+    )
+    row = result.first()
+
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Genie user verification request not found"
+        )
+
+    user, genie = row
+    if (user.role or "").upper() != "GENIE":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is not a GENIE"
+        )
+
+    genie.verification_status = "APPROVED"
+    genie.is_verified = True
+
+    db.add(
+        Notification(
+            user_id=user.id,
+            title="Verification Approved",
+            message="Your verification has been approved. You are now a verified Genie.",
+            is_read=False,
+        )
+    )
+
+    await db.commit()
+
+    return {
+        "message": "Verification approved",
+        "user_id": str(user.id),
+        "verification_status": "APPROVED",
+        "is_verified": True,
+    }
+
+
+@router.post("/verifications/{genie_user_id}/reject")
+async def reject_genie_verification(
+    genie_user_id: UUID,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Reject a GENIE verification request (admin only)."""
+    result = await db.execute(
+        select(User, Genie)
+        .join(Genie, Genie.id == User.id)
+        .where(User.id == genie_user_id)
+    )
+    row = result.first()
+
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Genie user verification request not found"
+        )
+
+    user, genie = row
+    if (user.role or "").upper() != "GENIE":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is not a GENIE"
+        )
+
+    genie.verification_status = "REJECTED"
+    genie.is_verified = False
+
+    db.add(
+        Notification(
+            user_id=user.id,
+            title="Verification Rejected",
+            message="Your verification request has been rejected.",
+            is_read=False,
+        )
+    )
+
+    await db.commit()
+
+    return {
+        "message": "Verification rejected",
+        "user_id": str(user.id),
+        "verification_status": "REJECTED",
+        "is_verified": False,
+    }
 
 
 @router.get("/dashboard")

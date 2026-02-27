@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
+from pathlib import Path
 
 from app.database import init_db
 from app.routes import jobs, offers, wallet, admin, users, notifications, chat
@@ -22,6 +24,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+uploads_root = Path(__file__).resolve().parents[1] / "uploads"
+uploads_root.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(uploads_root)), name="uploads")
 
 # Setup CORS
 app.add_middleware(

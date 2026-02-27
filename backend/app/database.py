@@ -43,6 +43,10 @@ async def init_db():
         # Test database connection
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
+            await conn.execute(text("ALTER TABLE IF EXISTS genies ADD COLUMN IF NOT EXISTS skill_proofs JSONB"))
+            await conn.execute(text("ALTER TABLE IF EXISTS genies ADD COLUMN IF NOT EXISTS document_path VARCHAR"))
+            await conn.execute(text("ALTER TABLE IF EXISTS genies ADD COLUMN IF NOT EXISTS verification_status VARCHAR"))
+            await conn.execute(text("ALTER TABLE IF EXISTS genies ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE"))
         logger.info("Database connection established successfully")
     except Exception as e:
         logger.warning(f"Database connection failed: {e}")

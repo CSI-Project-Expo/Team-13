@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Boolean, ARRAY
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
@@ -11,6 +12,9 @@ class Genie(Base):
     
     id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     skills = Column(ARRAY(String), nullable=True)
+    skill_proofs = Column(JSONB, nullable=True)
+    document_path = Column(String, nullable=True)
+    verification_status = Column(String, nullable=True)
     location = Column(String, nullable=True)
     is_verified = Column(Boolean, default=False)
     

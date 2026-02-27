@@ -89,6 +89,15 @@ export default function Navbar() {
                     ✨ {user.reward_points}
                   </span>
                 )}
+                {role === "genie" && user?.is_verified && (
+                  <span
+                    className="navbar__points-chip"
+                    title="Verified Genie"
+                    style={{ background: "var(--neo-green)" }}
+                  >
+                    ✅ Verified
+                  </span>
+                )}
               </Link>
               <button className="btn btn--sm btn--ghost" onClick={handleLogout}>
                 Logout
