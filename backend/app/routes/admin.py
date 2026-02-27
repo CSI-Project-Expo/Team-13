@@ -92,7 +92,7 @@ async def get_admin_dashboard(
     }
 
 
-@router.get("/users", response_model=List[UserResponse])
+@router.get("/users")
 async def get_all_users(
     role: Optional[str] = Query(None),
     limit: int = Query(50, le=100),
@@ -110,8 +110,26 @@ async def get_all_users(
     
     result = await db.execute(query)
     users = result.scalars().all()
-    
-    return users
+
+    sanitized_users = []
+    for user in users:
+        safe_role = (user.role or "user").lower()
+        if safe_role not in {"user", "genie", "admin"}:
+            safe_role = "user"
+
+        safe_name = (user.name or "Unnamed User").strip() or "Unnamed User"
+
+        sanitized_users.append(
+            {
+                "id": user.id,
+                "name": safe_name,
+                "role": safe_role,
+                "reward_points": user.reward_points or 0,
+                "created_at": user.created_at,
+            }
+        )
+
+    return sanitized_users
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)

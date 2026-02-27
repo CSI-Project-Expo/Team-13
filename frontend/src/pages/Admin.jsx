@@ -73,18 +73,62 @@ export default function Admin() {
     setTimeout(() => setToast(""), 3500);
   };
 
+  const normalizeUsers = (payload) => {
+    const list = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.users)
+        ? payload.users
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : [];
+
+    return list.map((user) => ({
+      ...user,
+      name: user?.name || "Unnamed User",
+      role: ["user", "genie", "admin"].includes(
+        String(user?.role || "").toLowerCase(),
+      )
+        ? String(user.role).toLowerCase()
+        : "user",
+      created_at: user?.created_at || new Date().toISOString(),
+    }));
+  };
+
   useEffect(() => {
     const loadAll = async () => {
       setLoading(true);
       try {
-        const [dash, usersData, jobsData] = await Promise.all([
+        const [dashResult, usersResult, jobsResult] = await Promise.allSettled([
           api.get("/api/v1/admin/dashboard"),
           api.get("/api/v1/admin/users"),
           api.get("/api/v1/admin/jobs"),
         ]);
-        setDashboard(dash);
-        setUsers(Array.isArray(usersData) ? usersData : []);
-        setJobs(Array.isArray(jobsData) ? jobsData : []);
+        if (dashResult.status === "fulfilled") {
+          setDashboard(dashResult.value);
+        } else {
+          setDashboard(null);
+          showToast(
+            `Dashboard load failed: ${dashResult.reason?.message || "Unknown error"}`,
+          );
+        }
+
+        if (usersResult.status === "fulfilled") {
+          setUsers(normalizeUsers(usersResult.value));
+        } else {
+          setUsers([]);
+          showToast(
+            `Users load failed: ${usersResult.reason?.message || "Unknown error"}`,
+          );
+        }
+
+        if (jobsResult.status === "fulfilled") {
+          setJobs(Array.isArray(jobsResult.value) ? jobsResult.value : []);
+        } else {
+          setJobs([]);
+          showToast(
+            `Jobs load failed: ${jobsResult.reason?.message || "Unknown error"}`,
+          );
+        }
       } catch (err) {
         showToast(`Error: ${err.message}`);
       } finally {
