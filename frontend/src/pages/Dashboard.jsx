@@ -76,8 +76,14 @@ export default function Dashboard() {
                         <h1 className="page__title">My Jobs</h1>
                         <p className="page__subtitle">Welcome back, {user?.name || 'User'} 👋</p>
                         {user?.reward_points > 0 && (
-                            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--amber)', fontWeight: 600 }}>
-                                ✨ You have {user.reward_points} Reward Points!
+                            <div style={{
+                                marginTop: 10, fontSize: 12, fontWeight: 700,
+                                color: 'var(--text)', textTransform: 'uppercase',
+                                background: 'var(--neo-yellow)', padding: '6px 14px',
+                                border: '2px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                                boxShadow: '2px 2px 0 var(--border)', display: 'inline-block',
+                            }}>
+                                ✨ {user.reward_points} Reward Points
                             </div>
                         )}
                     </div>

@@ -198,7 +198,12 @@ export default function Login() {
                     )}
 
                     {error && <p className="form-error">{error}</p>}
-                    {success && <p className="form-success" style={{ color: 'var(--color-success, #22c55e)', fontSize: '0.875rem', marginTop: '0.25rem' }}>{success}</p>}
+                    {success && <p style={{
+                        color: 'var(--green)', fontSize: '0.875rem', marginTop: '0.25rem',
+                        fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em',
+                        background: 'var(--green-light)', padding: '8px 14px',
+                        border: '2px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                    }}>{success}</p>}
 
                     <button
                         id="auth-submit"

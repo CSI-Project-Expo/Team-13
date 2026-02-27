@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import Navbar from '../components/Navbar';
 import Loader from '../components/Loader';
 
-/* ── Avatar with initials ────────────────────────────────────────────────── */
+/* ── Avatar with initials (Neo Brutalism) ──────────────────────────────── */
 function Avatar({ name, size = 80 }) {
     const initials = (name || 'U')
         .split(' ')
@@ -15,28 +15,31 @@ function Avatar({ name, size = 80 }) {
         .join('');
     return (
         <div style={{
-            width: size, height: size, borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--accent), #8b5cf6)',
+            width: size, height: size, borderRadius: 'var(--radius-lg)',
+            background: 'var(--neo-yellow)',
+            border: '2.5px solid var(--border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: size * 0.36, fontWeight: 700, color: '#fff',
-            flexShrink: 0, boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-            letterSpacing: '-0.02em',
+            fontSize: size * 0.36, fontWeight: 700, color: 'var(--text)',
+            flexShrink: 0, boxShadow: '4px 4px 0 var(--border)',
+            letterSpacing: '-0.02em', textTransform: 'uppercase',
         }}>
             {initials}
         </div>
     );
 }
 
-/* ── Section wrapper ─────────────────────────────────────────────────────── */
+/* ── Section wrapper (Neo Brutalism) ─────────────────────────────────── */
 function Section({ title, icon, children }) {
     return (
         <div style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
+            background: 'var(--surface)', border: '2.5px solid var(--border)',
             borderRadius: 'var(--radius-lg)', padding: '24px 28px',
-            boxShadow: 'var(--shadow-sm)',
+            boxShadow: '5px 5px 0 var(--border)',
         }}>
-            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)', marginBottom: 20,
-                display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20,
+                display: 'flex', alignItems: 'center', gap: 8,
+                textTransform: 'uppercase', letterSpacing: '0.04em',
+                paddingBottom: 12, borderBottom: '2.5px solid var(--border)' }}>
                 <span>{icon}</span>{title}
             </h2>
             {children}
@@ -44,18 +47,20 @@ function Section({ title, icon, children }) {
     );
 }
 
-/* ── Stat pill ───────────────────────────────────────────────────────────── */
+/* ── Stat pill (Neo Brutalism) ───────────────────────────────────────── */
 function StatPill({ label, value, accent }) {
     return (
         <div style={{
             flex: '1 1 120px', minWidth: 110,
-            background: accent ? 'var(--accent-light)' : 'var(--surface-2)',
-            border: `1px solid ${accent ? 'rgba(99,102,241,0.25)' : 'var(--border)'}`,
+            background: accent ? 'var(--neo-yellow)' : 'var(--surface)',
+            border: '2.5px solid var(--border)',
             borderRadius: 'var(--radius-md)', padding: '16px 20px',
             textAlign: 'center',
+            boxShadow: '4px 4px 0 var(--border)',
         }}>
-            <p style={{ fontSize: 22, fontWeight: 700, color: accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>{value}</p>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, fontWeight: 500 }}>{label}</p>
+            <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{value}</p>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
         </div>
     );
 }
@@ -192,34 +197,42 @@ export default function Profile() {
             <Navbar />
             <main className="page__content page__content--narrow" style={{ maxWidth: 680 }}>
 
-                {/* ── Hero header ───────────────────────────────────────── */}
+                {/* ── Hero header (Neo Brutalism) ───────────────────────────── */}
                 <div style={{
-                    background: 'linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%)',
+                    background: 'var(--neo-yellow)',
+                    border: '2.5px solid var(--border)',
                     borderRadius: 'var(--radius-xl)', padding: '36px 32px',
-                    marginBottom: 28, color: '#fff', position: 'relative', overflow: 'hidden',
+                    marginBottom: 28, color: 'var(--text)', position: 'relative', overflow: 'hidden',
+                    boxShadow: '6px 6px 0 var(--border)',
                 }}>
-                    {/* Decorative blob */}
-                    <div style={{ position:'absolute', top:-60, right:-60, width:220, height:220,
-                        background:'rgba(255,255,255,0.08)', borderRadius:'50%', pointerEvents:'none' }} />
-                    <div style={{ position:'absolute', bottom:-40, left:-40, width:160, height:160,
-                        background:'rgba(255,255,255,0.06)', borderRadius:'50%', pointerEvents:'none' }} />
+                    {/* Decorative shapes */}
+                    <div style={{ position:'absolute', top:-30, right:-30, width:120, height:120,
+                        background:'var(--neo-pink)', border:'2.5px solid var(--border)',
+                        borderRadius:'50%', pointerEvents:'none', opacity: 0.6 }} />
+                    <div style={{ position:'absolute', bottom:-20, left:-20, width:80, height:80,
+                        background:'var(--neo-blue)', border:'2.5px solid var(--border)',
+                        borderRadius:'var(--radius-sm)', pointerEvents:'none', opacity: 0.5,
+                        transform: 'rotate(15deg)' }} />
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 24, position: 'relative' }}>
                         <Avatar name={user?.name} size={80} />
                         <div style={{ flex: 1, minWidth: 0 }}>
-                            <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+                            <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0, lineHeight: 1.2,
+                                textTransform: 'uppercase', letterSpacing: '-0.01em' }}>
                                 {user?.name || 'Your Profile'}
                             </h1>
-                            <p style={{ margin: '6px 0 0', opacity: 0.85, fontSize: 14 }}>{email}</p>
+                            <p style={{ margin: '6px 0 0', fontSize: 14, fontWeight: 500 }}>{email}</p>
                             <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                                <span style={{ background:'rgba(255,255,255,0.2)', borderRadius:999,
-                                    padding:'3px 12px', fontSize:12, fontWeight:600, letterSpacing:'0.04em' }}>
+                                <span style={{ background:'var(--surface)', borderRadius:'var(--radius-sm)',
+                                    padding:'4px 14px', fontSize:12, fontWeight:700, letterSpacing:'0.04em',
+                                    textTransform:'uppercase', border:'2px solid var(--border)' }}>
                                     {roleLabel}
                                 </span>
                                 {memberSince && (
-                                    <span style={{ background:'rgba(255,255,255,0.15)', borderRadius:999,
-                                        padding:'3px 12px', fontSize:12, opacity:0.9 }}>
-                                        Member since {memberSince}
+                                    <span style={{ background:'var(--surface)', borderRadius:'var(--radius-sm)',
+                                        padding:'4px 14px', fontSize:12, fontWeight:600,
+                                        border:'2px solid var(--border)' }}>
+                                        Since {memberSince}
                                     </span>
                                 )}
                             </div>
@@ -266,7 +279,7 @@ export default function Profile() {
                                     style={{ opacity: 0.65 }}
                                     title="Email is managed by Supabase and cannot be changed here"
                                 />
-                                <span style={{ fontSize:12, color:'var(--text-muted)', marginTop:2 }}>
+                                <span style={{ fontSize:12, color:'var(--text-muted)', marginTop:2, fontWeight:600 }}>
                                     Email is linked to your sign-in account.
                                 </span>
                             </label>
@@ -291,10 +304,11 @@ export default function Profile() {
                     {/* ── Security ────────────────────────────────────── */}
                     <Section title="Security" icon="🔒">
                         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between',
-                            padding:'14px 0', borderBottom: pwSection ? '1px solid var(--border)' : 'none' }}>
+                            padding:'14px 0', borderBottom: pwSection ? '2.5px solid var(--border)' : 'none' }}>
                             <div>
-                                <p style={{ fontWeight:500, color:'var(--text)', marginBottom:3 }}>Password</p>
-                                <p style={{ fontSize:13, color:'var(--text-muted)' }}>
+                                <p style={{ fontWeight:700, color:'var(--text)', marginBottom:3,
+                                    textTransform:'uppercase', fontSize:14 }}>Password</p>
+                                <p style={{ fontSize:13, color:'var(--text-muted)', fontWeight:500 }}>
                                     {pwSection ? 'Enter your new password below.' : 'Change your account password.'}
                                 </p>
                             </div>
@@ -368,16 +382,18 @@ export default function Profile() {
                                     style={{
                                         display:'flex', alignItems:'center', justifyContent:'space-between',
                                         width:'100%', padding:'14px 0',
-                                        borderBottom:'1px solid var(--border)', background:'none', border:'none',
-                                        borderBottom:'1px solid var(--border)',
+                                        borderBottom:'2.5px solid var(--border)',
+                                        background:'none', border:'none',
+                                        borderBottom:'2.5px solid var(--border)',
                                         textAlign:'left', color:'var(--text)',
                                     }}
                                 >
                                     <div>
-                                        <p style={{ fontWeight:500, marginBottom:2 }}>{item.label}</p>
-                                        <p style={{ fontSize:13, color:'var(--text-muted)' }}>{item.desc}</p>
+                                        <p style={{ fontWeight:700, marginBottom:2, textTransform:'uppercase',
+                                            fontSize:14 }}>{item.label}</p>
+                                        <p style={{ fontSize:13, color:'var(--text-muted)', fontWeight:500 }}>{item.desc}</p>
                                     </div>
-                                    <span style={{ color:'var(--text-muted)', fontSize:18 }}>›</span>
+                                    <span style={{ color:'var(--text)', fontSize:20, fontWeight:700 }}>→</span>
                                 </button>
                             ))}
 
@@ -388,7 +404,8 @@ export default function Profile() {
                                     type="button"
                                     className="btn btn--ghost btn--full"
                                     onClick={handleLogout}
-                                    style={{ color:'var(--red)', borderColor:'var(--red)', opacity:0.85 }}
+                                    style={{ color:'var(--red)', borderColor:'var(--red)',
+                                        boxShadow:'3px 3px 0 var(--red)' }}
                                 >
                                     🚪 Sign Out
                                 </button>

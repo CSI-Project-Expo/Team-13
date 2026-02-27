@@ -16,31 +16,51 @@ export default function NotificationBell() {
         const now = new Date();
         const diff = now - date;
         
-        // Less than 1 minute
         if (diff < 60000) return 'Just now';
-        // Less than 1 hour
         if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-        // Less than 24 hours
         if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-        // Less than 7 days
         if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
-        // Otherwise show date
         return date.toLocaleDateString();
     };
 
     return (
-        <div className="notification-dropdown-container relative">
+        <div className="notification-dropdown-container" style={{ position: 'relative' }}>
             {/* Bell Button */}
             <button
                 onClick={toggleDropdown}
-                className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300"
                 aria-label="Notifications"
+                style={{
+                    position: 'relative',
+                    padding: '6px 10px',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'var(--surface)',
+                    border: '2.5px solid var(--border)',
+                    boxShadow: '2px 2px 0 var(--border)',
+                    transition: 'var(--transition)',
+                    fontSize: 18,
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translate(1px, 1px)';
+                    e.currentTarget.style.boxShadow = '1px 1px 0 var(--border)';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translate(0, 0)';
+                    e.currentTarget.style.boxShadow = '2px 2px 0 var(--border)';
+                }}
             >
-                <span className="text-xl">🔔</span>
-                
+                🔔
+
                 {/* Unread Badge */}
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                    <span style={{
+                        position: 'absolute', top: -6, right: -6,
+                        background: 'var(--accent)', color: '#fff',
+                        fontSize: 10, fontWeight: 700,
+                        borderRadius: 'var(--radius-sm)',
+                        height: 20, minWidth: 20, padding: '0 4px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        border: '2px solid var(--border)',
+                    }}>
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
@@ -48,16 +68,35 @@ export default function NotificationBell() {
 
             {/* Dropdown Panel */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-hidden">
+                <div style={{
+                    position: 'absolute', right: 0, marginTop: 8,
+                    width: 320,
+                    background: 'var(--surface)',
+                    border: '2.5px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    boxShadow: '5px 5px 0 var(--border)',
+                    zIndex: 50, maxHeight: 400, overflow: 'hidden',
+                }}>
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '12px 16px',
+                        borderBottom: '2.5px solid var(--border)',
+                        background: 'var(--neo-yellow)',
+                    }}>
+                        <h3 style={{ fontWeight: 700, color: 'var(--text)', fontSize: 14,
+                            textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                             Notifications
                         </h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
-                                className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+                                style={{
+                                    fontSize: 12, fontWeight: 700, color: 'var(--accent)',
+                                    background: 'none', border: 'none',
+                                    textDecoration: 'underline', textDecorationThickness: '2px',
+                                    textTransform: 'uppercase',
+                                }}
                             >
                                 Mark all read
                             </button>
@@ -65,15 +104,15 @@ export default function NotificationBell() {
                     </div>
 
                     {/* Notification List */}
-                    <div className="overflow-y-auto max-h-80">
+                    <div className="overflow-y-auto" style={{ maxHeight: 320, overflowY: 'auto' }}>
                         {loading ? (
-                            <div className="flex items-center justify-center py-8">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+                                <div className="loader-ring"><div></div><div></div><div></div></div>
                             </div>
                         ) : notifications.length === 0 ? (
-                            <div className="text-center py-8 px-4">
-                                <span className="text-4xl">📭</span>
-                                <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
+                            <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+                                <span style={{ fontSize: 40 }}>📭</span>
+                                <p style={{ color: 'var(--text-muted)', marginTop: 8, fontSize: 13, fontWeight: 600 }}>
                                     No notifications yet
                                 </p>
                             </div>
@@ -82,32 +121,50 @@ export default function NotificationBell() {
                                 <div
                                     key={notification.id}
                                     onClick={() => markAsRead(notification.id)}
-                                    className={`px-4 py-3 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                                        !notification.is_read 
-                                            ? 'bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-l-indigo-500' 
-                                            : ''
-                                    }`}
+                                    style={{
+                                        padding: '12px 16px',
+                                        borderBottom: '2px solid var(--border)',
+                                        cursor: 'pointer',
+                                        transition: 'var(--transition)',
+                                        background: !notification.is_read ? 'var(--accent-light)' : 'transparent',
+                                        borderLeft: !notification.is_read ? '4px solid var(--accent)' : '4px solid transparent',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'var(--surface-2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = !notification.is_read ? 'var(--accent-light)' : 'transparent';
+                                    }}
                                 >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-medium truncate ${
-                                                !notification.is_read 
-                                                    ? 'text-gray-900 dark:text-white' 
-                                                    : 'text-gray-600 dark:text-gray-400'
-                                            }`}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <p style={{
+                                                fontSize: 13, fontWeight: !notification.is_read ? 700 : 500,
+                                                color: 'var(--text)',
+                                                textTransform: 'uppercase', letterSpacing: '0.02em',
+                                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                            }}>
                                                 {notification.title}
                                             </p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                            <p className="line-clamp-2" style={{
+                                                fontSize: 13, color: 'var(--text-muted)', marginTop: 4,
+                                            }}>
                                                 {notification.message}
                                             </p>
-                                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4,
+                                                fontWeight: 600 }}>
                                                 {formatTime(notification.created_at)}
                                             </p>
                                         </div>
                                         
                                         {/* Unread indicator */}
                                         {!notification.is_read && (
-                                            <span className="ml-2 h-2 w-2 bg-indigo-500 rounded-full flex-shrink-0 mt-1"></span>
+                                            <span style={{
+                                                marginLeft: 8, height: 8, width: 8,
+                                                background: 'var(--accent)',
+                                                borderRadius: '50%', flexShrink: 0, marginTop: 4,
+                                                border: '1px solid var(--border)',
+                                            }} />
                                         )}
                                     </div>
                                 </div>

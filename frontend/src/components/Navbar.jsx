@@ -64,10 +64,11 @@ export default function Navbar() {
                             <NotificationBell />
                             <Link to="/profile" className="navbar__user" style={{ textDecoration: 'none' }}>
                                 <span style={{
-                                    width: 30, height: 30, borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, var(--accent), #8b5cf6)',
+                                    width: 32, height: 32, borderRadius: 'var(--radius-sm)',
+                                    background: 'var(--neo-yellow)',
+                                    border: '2px solid var(--border)',
                                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0,
+                                    fontSize: 13, fontWeight: 700, color: 'var(--text)', flexShrink: 0,
                                 }}>
                                     {(user.name || 'U').charAt(0).toUpperCase()}
                                 </span>
