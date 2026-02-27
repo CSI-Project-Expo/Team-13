@@ -21,12 +21,16 @@ function clearSession() {
  */
 export async function apiRequest(endpoint, options = {}) {
     const token = getToken();
+    const isFormData = options.body instanceof FormData;
 
     const headers = {
-        'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
     };
+
+    if (!isFormData && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
         ...options,
@@ -74,6 +78,13 @@ export const api = {
         apiRequest(endpoint, {
             method: 'POST',
             body: JSON.stringify(body),
+            ...options,
+        }),
+
+    postForm: (endpoint, formData, options = {}) =>
+        apiRequest(endpoint, {
+            method: 'POST',
+            body: formData,
             ...options,
         }),
 

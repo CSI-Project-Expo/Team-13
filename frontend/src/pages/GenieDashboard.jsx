@@ -20,6 +20,7 @@ function SkeletonCard() {
 const TABS = [
     { key: 'available', label: '🔍 Available Jobs' },
     { key: 'my-jobs', label: '📋 My Assignments' },
+    { key: 'verification', label: '✅ Verification' },
 ];
 
 export default function GenieDashboard() {
@@ -31,6 +32,10 @@ export default function GenieDashboard() {
     const [rateUserJob, setRateUserJob] = useState(null);
     const [isRating, setIsRating] = useState(false);
     const [toast, setToast] = useState('');
+    const [verificationLoading, setVerificationLoading] = useState(false);
+    const [skillsInput, setSkillsInput] = useState('');
+    const [skillProofFiles, setSkillProofFiles] = useState([]);
+    const [documentFile, setDocumentFile] = useState(null);
 
     const showToast = (msg) => {
         setToast(msg);
@@ -38,6 +43,11 @@ export default function GenieDashboard() {
     };
 
     const loadJobs = useCallback(async () => {
+        if (tab === 'verification') {
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             const endpoint =
@@ -130,6 +140,47 @@ export default function GenieDashboard() {
         return null;
     };
 
+    const handleVerificationSubmit = async (event) => {
+        event.preventDefault();
+        if (!documentFile) {
+            showToast('Please upload a verification document.');
+            return;
+        }
+
+        const skills = skillsInput
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean);
+
+        if (skills.length === 0) {
+            showToast('Please add at least one skill.');
+            return;
+        }
+
+        setVerificationLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('document', documentFile);
+            formData.append('skills', JSON.stringify(skills));
+
+            if (skillProofFiles.length > 0) {
+                skillProofFiles.forEach((file) => {
+                    formData.append('skill_proof_docs', file);
+                });
+            }
+
+            await api.postForm('/api/v1/users/verification/apply', formData);
+            showToast('Verification submitted and sent for review.');
+            setDocumentFile(null);
+            setSkillsInput('');
+            setSkillProofFiles([]);
+        } catch (err) {
+            showToast(`Error: ${err.message}`);
+        } finally {
+            setVerificationLoading(false);
+        }
+    };
+
     return (
         <div className="page">
             <Navbar />
@@ -155,7 +206,50 @@ export default function GenieDashboard() {
                 </div>
 
                 {/* Content */}
-                {loading ? (
+                {tab === 'verification' ? (
+                    <section className="card" style={{ marginTop: 16 }}>
+                        <h2 className="section-title">Genie Verification</h2>
+                        <form onSubmit={handleVerificationSubmit} className="form-grid">
+                            <div className="form-group">
+                                <label className="form-label">Document</label>
+                                <input
+                                    className="form-input"
+                                    type="file"
+                                    onChange={(event) => setDocumentFile(event.target.files?.[0] || null)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Skills (comma separated)</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    placeholder="Plumbing, Electrician"
+                                    value={skillsInput}
+                                    onChange={(event) => setSkillsInput(event.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Skill Proof Documents (optional)</label>
+                                <input
+                                    className="form-input"
+                                    type="file"
+                                    multiple
+                                    onChange={(event) => setSkillProofFiles(Array.from(event.target.files || []))}
+                                />
+                            </div>
+
+                            <div>
+                                <button className="btn btn--primary" type="submit" disabled={verificationLoading}>
+                                    {verificationLoading ? 'Submitting...' : 'Submit Verification'}
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                ) : loading ? (
                     <div className="job-grid">
                         {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
                     </div>

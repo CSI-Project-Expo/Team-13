@@ -67,6 +67,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [toast, setToast] = useState("");
+  const [pendingVerifications, setPendingVerifications] = useState([]);
+  const [verificationUpdatingId, setVerificationUpdatingId] = useState(null);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -92,6 +94,30 @@ export default function Admin() {
         : "user",
       created_at: user?.created_at || new Date().toISOString(),
     }));
+  };
+
+  const buildFileUrl = (path) => {
+    if (!path || typeof path !== "string") return null;
+    if (path.startsWith("http://") || path.startsWith("https://")) return path;
+    return `${import.meta.env.VITE_BACKEND_URL}${path}`;
+  };
+
+  const extractProofLinks = (proofs) => {
+    if (!proofs) return [];
+    if (typeof proofs === "string") return [proofs];
+
+    if (Array.isArray(proofs)) {
+      return proofs.filter((item) => typeof item === "string");
+    }
+
+    if (typeof proofs === "object") {
+      if (Array.isArray(proofs.documents)) {
+        return proofs.documents.filter((item) => typeof item === "string");
+      }
+      return Object.values(proofs).filter((item) => typeof item === "string");
+    }
+
+    return [];
   };
 
   useEffect(() => {
@@ -129,6 +155,14 @@ export default function Admin() {
             `Jobs load failed: ${jobsResult.reason?.message || "Unknown error"}`,
           );
         }
+
+        try {
+          const verificationData = await api.get("/api/v1/admin/verifications/pending");
+          setPendingVerifications(Array.isArray(verificationData) ? verificationData : []);
+        } catch (verificationError) {
+          setPendingVerifications([]);
+          showToast(`Verification load failed: ${verificationError.message}`);
+        }
       } catch (err) {
         showToast(`Error: ${err.message}`);
       } finally {
@@ -156,6 +190,33 @@ export default function Admin() {
     }
   };
 
+  const handleVerificationAction = async (userId, action) => {
+    setVerificationUpdatingId(userId);
+    try {
+      await api.post(`/api/v1/admin/verifications/${userId}/${action}`, {});
+      setPendingVerifications((prev) => prev.filter((item) => item.user_id !== userId));
+      showToast(`Verification ${action}d successfully.`);
+    } catch (err) {
+      showToast(`Error: ${err.message}`);
+    } finally {
+      setVerificationUpdatingId(null);
+    }
+  };
+
+  useEffect(() => {
+    const loadPendingVerifications = async () => {
+      if (activeTab !== "verifications") return;
+      try {
+        const verificationData = await api.get("/api/v1/admin/verifications/pending");
+        setPendingVerifications(Array.isArray(verificationData) ? verificationData : []);
+      } catch (err) {
+        showToast(`Verification load failed: ${err.message}`);
+      }
+    };
+
+    loadPendingVerifications();
+  }, [activeTab]);
+
   const jobsByStatus = dashboard?.jobs_by_status || {};
   const usersByRole = dashboard?.users_by_role || {};
 
@@ -172,7 +233,7 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="filter-tabs">
-          {["overview", "users", "jobs"].map((t) => (
+          {["overview", "users", "jobs", "verifications"].map((t) => (
             <button
               key={t}
               className={`filter-tab${activeTab === t ? " filter-tab--active" : ""}`}
@@ -316,6 +377,100 @@ export default function Admin() {
                               {new Date(j.created_at).toLocaleDateString(
                                 "en-IN",
                               )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === "verifications" && (
+              <>
+                <h2 className="section-title">
+                  Pending Genie Verifications ({pendingVerifications.length})
+                </h2>
+                {pendingVerifications.length === 0 ? (
+                  <EmptyState icon="✅" title="No pending verification requests" />
+                ) : (
+                  <div className="admin-table-wrap">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Document</th>
+                          <th>Skills</th>
+                          <th>Skill Proofs</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pendingVerifications.map((item) => (
+                          <tr key={item.user_id} className="admin-table__row">
+                            <td className="admin-table__cell">{item.name || "—"}</td>
+                            <td className="admin-table__cell">
+                              {item.document_path ? (
+                                <a
+                                  href={`${import.meta.env.VITE_BACKEND_URL}${item.document_path}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View Document
+                                </a>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                            <td className="admin-table__cell">
+                              {Array.isArray(item.skills) && item.skills.length > 0
+                                ? item.skills.join(", ")
+                                : "—"}
+                            </td>
+                            <td className="admin-table__cell">
+                              {(() => {
+                                const proofLinks = extractProofLinks(item.skill_proofs);
+                                if (proofLinks.length === 0) return "—";
+
+                                return (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                    {proofLinks.map((proofPath, index) => {
+                                      const proofUrl = buildFileUrl(proofPath);
+                                      if (!proofUrl) return null;
+
+                                      return (
+                                        <a
+                                          key={`${item.user_id}-${index}`}
+                                          href={proofUrl}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                        >
+                                          View Proof {index + 1}
+                                        </a>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })()}
+                            </td>
+                            <td className="admin-table__cell">
+                              <div className="admin-table__actions">
+                                <button
+                                  className="btn btn--sm btn--primary"
+                                  onClick={() => handleVerificationAction(item.user_id, "approve")}
+                                  disabled={verificationUpdatingId === item.user_id}
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  className="btn btn--sm"
+                                  onClick={() => handleVerificationAction(item.user_id, "reject")}
+                                  disabled={verificationUpdatingId === item.user_id}
+                                >
+                                  Reject
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
