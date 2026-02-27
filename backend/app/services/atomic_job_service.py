@@ -7,6 +7,7 @@ import asyncio
 import logging
 
 from app.models.job import Job, JobStatus
+from app.services.notification_service import NotificationService
 from app.services.embedding_service import generate_embedding
 from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError
 
@@ -88,6 +89,14 @@ class AtomicJobService:
             await self.db.commit()
             await self.db.refresh(job)
             
+            # Notify job owner
+            notification_service = NotificationService(self.db)
+            await notification_service.create_notification(
+                user_id=job.user_id,
+                title="Your job has started",
+                message=f"A Genie has started working on your job '{job.title}'."
+            )
+            
             logger.info(f"Genie {genie_id} started job {job_id} atomically")
             return job
             
@@ -129,6 +138,14 @@ class AtomicJobService:
             
             await self.db.commit()
             await self.db.refresh(job)
+            
+            # Notify job owner
+            notification_service = NotificationService(self.db)
+            await notification_service.create_notification(
+                user_id=job.user_id,
+                title="Your job is complete",
+                message=f"Your job '{job.title}' has been completed by the Genie. Please review and release payment."
+            )
             
             logger.info(f"Genie {genie_id} completed job {job_id} atomically")
             return job

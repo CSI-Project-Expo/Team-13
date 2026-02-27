@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import RoleSelect from './pages/RoleSelect';
@@ -17,7 +18,8 @@ export default function App() {
     <BrowserRouter>
       <CustomCursor />
       <AuthProvider>
-        <Routes>
+        <NotificationProvider>
+          <Routes>
           {/* Public */}
           <Route path="/" element={<RoleSelect />} />
           <Route path="/login" element={<Login />} />
@@ -81,7 +83,8 @@ export default function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </AuthProvider>
+      </NotificationProvider>
+    </AuthProvider>
     </BrowserRouter>
   );
 }

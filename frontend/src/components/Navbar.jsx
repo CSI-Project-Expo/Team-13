@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import ThemeToggle from './ThemeToggle';
+import NotificationBell from './NotificationBell';
 
 const NAV_LINKS = {
     user: [
@@ -60,6 +61,7 @@ export default function Navbar() {
                     <ThemeToggle />
                     {user && (
                         <>
+                            <NotificationBell />
                             <Link to="/profile" className="navbar__user" style={{ textDecoration: 'none' }}>
                                 <span style={{
                                     width: 30, height: 30, borderRadius: '50%',

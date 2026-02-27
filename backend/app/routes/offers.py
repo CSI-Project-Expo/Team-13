@@ -13,6 +13,7 @@ from app.models.job import JobStatus
 from app.models.offer import Offer
 from app.schemas.offer import OfferCreate, OfferUpdate, OfferResponse
 from app.services.job_service import JobService
+from app.services.notification_service import NotificationService
 
 router = APIRouter()
 
@@ -65,6 +66,14 @@ class OfferService:
         self.db.add(offer)
         await self.db.commit()
         await self.db.refresh(offer)
+        
+        # Notify job owner about new offer
+        notification_service = NotificationService(self.db)
+        await notification_service.create_notification(
+            user_id=job.user_id,
+            title="New offer received",
+            message=f"A Genie has made an offer of ₹{offer_data.offer_price} for your job '{job.title}'."
+        )
         
         # Load relationships for response
         result = await self.db.execute(
