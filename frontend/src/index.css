@@ -63,28 +63,6 @@
   --transition: all 0.15s ease;
 }
 
-/* ── Dark Theme ──────────────────────────────────────────── */
-[data-theme="dark"] {
-  --bg: #1a1a2e;
-  --surface: #16213e;
-  --surface-2: #0f3460;
-  --border: #e94560;
-  --text: #f5f0e8;
-  --text-muted: #a8a8c8;
-
-  --accent-light: #3f1727;
-
-  --shadow-sm: 3px 3px 0 rgba(233, 69, 96, 0.6);
-  --shadow-md: 5px 5px 0 rgba(233, 69, 96, 0.6);
-  --shadow-lg: 8px 8px 0 rgba(233, 69, 96, 0.6);
-
-  --green-light: #064e3b;
-  --amber-light: #78350f;
-  --blue-light: #1e3a5f;
-  --purple-light: #3b1f6e;
-  --red-light: #7f1d1d;
-}
-
 /* ── Reset & Base ────────────────────────────────────────── */
 *,
 *::before,
@@ -375,10 +353,6 @@ select {
   background: rgba(245, 240, 232, 0.85);
   z-index: 200;
   padding: 0;
-}
-
-[data-theme="dark"] .loader-wrapper--full {
-  background: rgba(26, 26, 46, 0.85);
 }
 
 .loader-ring {
@@ -890,33 +864,6 @@ select {
   border: 2px solid var(--border);
 }
 
-/* ── Theme Toggle ────────────────────────────────────────── */
-.theme-toggle {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: var(--text);
-  transition: var(--transition);
-  background: var(--surface);
-  border: var(--border-w) solid var(--border);
-  box-shadow: 2px 2px 0 var(--border);
-}
-
-.theme-toggle:hover {
-  background: var(--neo-yellow);
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--border);
-}
-
-.theme-toggle:active {
-  box-shadow: none;
-  transform: translate(2px, 2px);
-}
-
 /* ── Page Layout ─────────────────────────────────────────── */
 .page {
   min-height: 100vh;
@@ -1133,10 +1080,6 @@ select {
   animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-[data-theme="dark"] .auth-card {
-  background: var(--surface);
-}
-
 @keyframes cardPop {
   from {
     opacity: 0;
@@ -1251,10 +1194,6 @@ select {
   transition: var(--transition);
   text-align: center;
   box-shadow: var(--shadow-md);
-}
-
-[data-theme="dark"] .role-tile {
-  background: var(--surface);
 }
 
 .role-tile:hover {
