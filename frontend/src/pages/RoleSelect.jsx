@@ -53,9 +53,8 @@ export default function RoleSelect() {
           >
             <div className="landing__hero-copy">
               <p className="landing__eyebrow">START GETTING THINGS DONE</p>
-              <h1 id="landing-hero-title" className="landing__title">
-                No chores.
-                <span className="landing__title-accent"> Just Do4U.</span>
+              <h1 id="landing-hero-title" className="landing__hero-headline">
+                No chores. <span className="landing__hero-headline--accent">Just Do4U.</span>
               </h1>
               <p className="landing__subtitle">
                 Skip the endless back-and-forth. Do4U matches you with trusted
