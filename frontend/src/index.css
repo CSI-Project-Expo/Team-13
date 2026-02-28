@@ -199,6 +199,33 @@ select {
   width: 100%;
 }
 
+/* ── Google OAuth Button ─────────────────────────────────── */
+.btn--google {
+  background: var(--surface);
+  color: var(--text);
+  border: var(--border-w) solid var(--border);
+  box-shadow: var(--shadow-sm);
+  gap: 10px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.btn--google:hover:not(:disabled) {
+  background: var(--bg);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--border);
+}
+
+.btn--google:active:not(:disabled) {
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}
+
+.btn__icon {
+  flex-shrink: 0;
+}
+
 /* ── Button Spinner ──────────────────────────────────────── */
 .btn-spinner {
   width: 18px;
@@ -1152,6 +1179,31 @@ select {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* ── Auth Divider ────────────────────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: var(--border-w) solid var(--border);
+}
+
+.auth-divider span {
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
 }
 
 .link {

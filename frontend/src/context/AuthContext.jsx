@@ -68,6 +68,24 @@ export function AuthProvider({ children }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
                 if (event === 'SIGNED_IN' && session?.access_token) {
+                    // For OAuth logins, ensure user has a role in metadata
+                    const user = session.user;
+                    const hasRole = user?.user_metadata?.role;
+                    
+                    // If OAuth user doesn't have role, check URL params or default to 'user'
+                    if (!hasRole && user?.app_metadata?.provider === 'google') {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const roleFromUrl = urlParams.get('role') || 'user';
+                        
+                        // Update user metadata with role
+                        await supabase.auth.updateUser({
+                            data: { 
+                                role: roleFromUrl,
+                                name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]
+                            }
+                        });
+                    }
+                    
                     await fetchMe(session.access_token);
                 } else if (event === 'SIGNED_OUT') {
                     clearSession();
