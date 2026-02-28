@@ -14,10 +14,57 @@ export default function RoleSelect() {
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
+      
+      // Parallax effect for hero section
+      const heroCopy = document.querySelector('.landing__hero-copy');
+      const heroDevice = document.querySelector('.landing__hero-device');
+      
+      if (heroCopy || heroDevice) {
+        const scrollY = window.scrollY;
+        // Apply parallax only when viewing hero section (roughly top 800px)
+        if (scrollY < 800) {
+          const parallaxSpeed = 0.5;
+          const offset = scrollY * parallaxSpeed;
+          
+          if (heroCopy) {
+            heroCopy.style.transform = `translateY(${offset * 0.3}px)`;
+          }
+          if (heroDevice) {
+            heroDevice.style.transform = `translateY(${offset * 0.2}px)`;
+          }
+        }
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll-triggered animations
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    const elementsToAnimate = document.querySelectorAll(
+      '.landing__hero-copy, .landing__hero-device, .landing__flow-card, .landing__card, .landing__story-card, .landing__marquee, .landing__cta-inner'
+    );
+
+    elementsToAnimate.forEach((el) => {
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   const scrollToTop = () => {
@@ -206,7 +253,13 @@ export default function RoleSelect() {
           <section className="landing__sections">
             <div className="landing__card-grid">
               <article className="landing__card">
-                <div className="landing__card-icon">🎯</div>
+                <div className="landing__card-icon">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="24" cy="24" r="13" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="24" cy="24" r="6" fill="currentColor"/>
+                  </svg>
+                </div>
                 <h3 className="landing__card-title">Your Chaos, Solved</h3>
                 <p className="landing__card-text">
                   Last-minute airport run? Garden grass too long? Furniture
@@ -216,7 +269,12 @@ export default function RoleSelect() {
               </article>
 
               <article className="landing__card">
-                <div className="landing__card-icon">✨</div>
+                <div className="landing__card-icon">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 4L28 16H40L30 22L34 34L24 28L14 34L18 22L8 16H20L24 4Z" fill="currentColor"/>
+                    <path d="M32 20L36 30L28 25L20 30L24 20" fill="currentColor" opacity="0.5"/>
+                  </svg>
+                </div>
                 <h3 className="landing__card-title">Smart Matching</h3>
                 <p className="landing__card-text">
                   Filter by location, task type, budget, and timeline. See
@@ -226,7 +284,12 @@ export default function RoleSelect() {
               </article>
 
               <article className="landing__card">
-                <div className="landing__card-icon">💬</div>
+                <div className="landing__card-icon">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 24C8 16.27 13.2 9.74 20 7.5V8C20 10.2 21.8 12 24 12C26.2 12 28 10.2 28 8V7.5C34.8 9.74 40 16.27 40 24C40 33.94 32.06 42 24 42C15.94 42 8 33.94 8 24Z" fill="currentColor"/>
+                    <rect x="20" y="18" width="8" height="10" rx="1" fill="var(--bg)"/>
+                  </svg>
+                </div>
                 <h3 className="landing__card-title">Clear Communication</h3>
                 <p className="landing__card-text">
                   Built-in chat with smart prompts keeps everything smooth.
