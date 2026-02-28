@@ -1,4 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
+import AnimatedChat from "../components/AnimatedChat";
 
 export default function RoleSelect() {
   const navigate = useNavigate();
@@ -95,22 +96,7 @@ export default function RoleSelect() {
                     <span className="landing__device-battery" />
                   </span>
                 </div>
-                <div className="landing__device-body">
-                  <div className="landing__chat-bubble landing__chat-bubble--you">
-                    Hey, I&apos;m way too lazy to cut my garden grass this week.
-                  </div>
-                  <div className="landing__chat-bubble landing__chat-bubble--tag">
-                    New task · 5 mins away
-                  </div>
-                  <div className="landing__chat-bubble landing__chat-bubble--genie">
-                    I&apos;ve got you. I&apos;ll trim the lawn and send you
-                    photos once it&apos;s all done.
-                  </div>
-                  <div className="landing__device-footer">
-                    <span className="landing__pill">Real-time updates</span>
-                    <span className="landing__pill">In-app wallet</span>
-                  </div>
-                </div>
+                <AnimatedChat />
               </div>
             </div>
           </section>
