@@ -1274,6 +1274,7 @@ select {
   position: relative;
   overflow: hidden;
   background-color: var(--bg);
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M4 8 L16 16 L4 24 L8 20 L8 24 L4 28 L0 24 L4 20 L4 16 L4 12 L4 8 Z" fill="%23ff6b9d" stroke="%23000" stroke-width="2"/></svg>'), auto;
 }
 
 .landing__inner {
@@ -2408,11 +2409,71 @@ select {
   padding: 12px 8px;
 }
 
+.animated-chat__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.animated-chat__title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text);
+  letter-spacing: 0.1em;
+}
+
+.animated-chat__dots-indicator {
+  display: flex;
+  gap: 4px;
+}
+
+.animated-chat__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all 0.3s ease;
+}
+
+.animated-chat__dot.active {
+  background: var(--accent);
+  transform: scale(1.2);
+}
+
 .animated-chat__messages {
   display: flex;
   flex-direction: column;
   gap: 12px;
   flex: 1;
+  transition: opacity 0.3s ease;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding-right: 4px;
+}
+
+.animated-chat__messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.animated-chat__messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.animated-chat__messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.animated-chat__messages::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.animated-chat__messages.transitioning {
+  opacity: 0;
 }
 
 .animated-chat__row {
@@ -2426,6 +2487,10 @@ select {
 
 .animated-chat__row--you {
   justify-content: flex-end;
+}
+
+.animated-chat__row--system {
+  justify-content: center;
 }
 
 .animated-chat__bubble {
@@ -2447,6 +2512,12 @@ select {
   color: #000;
 }
 
+.animated-chat__row--system .animated-chat__bubble {
+  background: #000;
+  color: #22c55e;
+  text-align: center;
+}
+
 .animated-chat__label {
   display: block;
   font-size: 10px;
@@ -2460,6 +2531,11 @@ select {
 .animated-chat__row--you .animated-chat__label {
   text-align: right;
   color: #65a30d;
+}
+
+.animated-chat__row--system .animated-chat__label {
+  text-align: center;
+  color: #22c55e;
 }
 
 .animated-chat__text {
