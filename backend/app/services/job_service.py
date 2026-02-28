@@ -4,7 +4,6 @@ from sqlalchemy.orm import selectinload
 from typing import List, Optional
 from uuid import UUID
 from enum import Enum
-import asyncio
 import logging
 
 from app.models.job import Job, JobStatus
@@ -15,7 +14,6 @@ from app.schemas.job import JobCreate, JobUpdate, UserRatingRequest
 from app.utils.exceptions import JobNotFoundError, InvalidJobTransitionError, JobAlreadyAssignedError, InsufficientFundsError
 from datetime import datetime
 from app.schemas.job import JobCreate, JobUpdate
-from app.services.embedding_service import generate_embedding
 from app.services.wallet_service import WalletService
 from app.services.notification_service import NotificationService
 from app.models.wallet import Wallet
@@ -142,10 +140,6 @@ class JobService:
         # Update status
         job.status = new_status
 
-        if new_status == JobStatus.COMPLETED and job.embedding is None:
-            combined_text = f"{job.title} {job.description} {job.location or ''}".strip()
-            job.embedding = await asyncio.to_thread(generate_embedding, combined_text)
-
         await self.db.commit()
         await self.db.refresh(job)
         
@@ -167,21 +161,15 @@ class JobService:
         update_data = job_update.model_dump(exclude_unset=True)
         
         # Validate status transition if status is being updated
-        should_generate_embedding = False
         if "status" in update_data:
             new_status = JobStatus(update_data["status"])
             if not JobLifecycleValidator.validate_transition(job.status, new_status):
                 raise InvalidJobTransitionError(
                     f"Invalid transition from {job.status} to {new_status}"
                 )
-            should_generate_embedding = new_status == JobStatus.COMPLETED
         
         for field, value in update_data.items():
             setattr(job, field, value)
-
-        if should_generate_embedding and job.embedding is None:
-            combined_text = f"{job.title} {job.description} {job.location or ''}".strip()
-            job.embedding = await asyncio.to_thread(generate_embedding, combined_text)
         
         await self.db.commit()
         await self.db.refresh(job)

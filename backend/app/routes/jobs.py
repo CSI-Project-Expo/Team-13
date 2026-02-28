@@ -15,10 +15,36 @@ from app.schemas.job import (
 from app.services.job_service import JobService
 from app.services.atomic_job_service import AtomicJobService
 from app.services.ai_pricing import ai_pricing_service
-from app.services.rag_pricing_service import suggest_price
 
 
 router = APIRouter()
+
+
+def _build_price_estimate_response(pricing_result: dict) -> dict:
+    estimated_price = pricing_result.get("estimated_price", {})
+    min_price = estimated_price.get("min")
+    recommended_price = estimated_price.get("recommended")
+    max_price = estimated_price.get("max")
+
+    confidence_level = pricing_result.get("confidence_level")
+    confidence_text = (
+        f" Confidence: {int(confidence_level * 100)}%."
+        if isinstance(confidence_level, (int, float))
+        else ""
+    )
+
+    return {
+        "suggested_range": {
+            "min": min_price,
+            "avg": recommended_price,
+            "max": max_price,
+        },
+        "based_on": None,
+        "min_price": min_price,
+        "max_price": max_price,
+        "reasoning": f"AI estimate based on job details, duration, and location.{confidence_text}",
+        "confidence_level": confidence_level,
+    }
 
 
 @router.post("/", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
@@ -222,12 +248,13 @@ async def get_price_estimate(
             detail="Job not found"
         )
 
-    return await suggest_price(
-        db,
+    pricing_result = ai_pricing_service.estimate_price(
         title=job.title,
         description=job.description,
-        location=job.location
+        location=job.location,
+        duration=job.duration,
     )
+    return _build_price_estimate_response(pricing_result)
 
 
 @router.post("/price-estimate")
@@ -236,14 +263,13 @@ async def get_price_estimate_for_job(
     current_user: User = Depends(require_any_role),
     db: AsyncSession = Depends(get_db)
 ):
-    return await suggest_price(
-        db,
+    pricing_result = ai_pricing_service.estimate_price(
         title=job_data.title,
         description=job_data.description,
-        location=job_data.location
+        location=job_data.location,
+        duration=job_data.duration,
     )
-    
-    return estimate
+    return _build_price_estimate_response(pricing_result)
 
 
 @router.post("/{job_id}/rate-user", response_model=UserRatingResponse)
