@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 
-export default function JobChat({ jobId, jobStatus, currentUserId }) {
+export default function JobChat({
+  jobId,
+  jobStatus,
+  currentUserId,
+  jobOwnerId,
+  assignedGenieId,
+}) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -9,6 +15,17 @@ export default function JobChat({ jobId, jobStatus, currentUserId }) {
   const messagesEndRef = useRef(null);
 
   const canChat = ["POSTED", "ACCEPTED", "IN_PROGRESS"].includes(jobStatus);
+
+  // Check if current user is the job owner (user who posted the job)
+  const isJobOwner = currentUserId === jobOwnerId;
+
+  // Check if genie has sent any messages
+  const genieHasMessaged = messages.some(
+    (msg) => msg.sender_id === assignedGenieId,
+  );
+
+  // User can only send messages if they're the genie OR if they're the job owner and genie has messaged
+  const canSendMessage = !isJobOwner || genieHasMessaged;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,7 +133,11 @@ export default function JobChat({ jobId, jobStatus, currentUserId }) {
           <div className="job-chat__messages">
             {messages.length === 0 ? (
               <div className="job-chat__empty">
-                <p>No messages yet. Start a conversation!</p>
+                <p>
+                  {isJobOwner
+                    ? "Waiting for the Genie to start the conversation..."
+                    : "No messages yet. Start a conversation!"}
+                </p>
                 <p style={{ fontSize: "11px", marginTop: "8px", opacity: 0.7 }}>
                   Messages will be saved. The other person can reply anytime.
                 </p>
@@ -151,15 +172,19 @@ export default function JobChat({ jobId, jobStatus, currentUserId }) {
             <input
               type="text"
               className="job-chat__input"
-              placeholder="Type a message..."
+              placeholder={
+                !canSendMessage
+                  ? "Waiting for Genie to start the conversation..."
+                  : "Type a message..."
+              }
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              disabled={!isConnected}
+              disabled={!isConnected || !canSendMessage}
             />
             <button
               type="submit"
               className="btn btn--primary btn--sm"
-              disabled={!isConnected || !newMessage.trim()}
+              disabled={!isConnected || !newMessage.trim() || !canSendMessage}
             >
               Send
             </button>

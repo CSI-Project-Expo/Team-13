@@ -1,5 +1,6 @@
 import StatusBadge from "./StatusBadge";
 import JobChat from "./JobChat";
+import ButtonSpinner from "./ButtonSpinner";
 
 /**
  * Job card for listing views.
@@ -55,18 +56,28 @@ export default function JobCard({
             onClick={() => onAction(job)}
             disabled={loading}
           >
-            {loading ? "Loading…" : actionLabel}
+            {loading ? (
+              <>
+                <ButtonSpinner />
+                Loading
+              </>
+            ) : (
+              actionLabel
+            )}
           </button>
         )}
       </div>
 
-      {/* Chat component - shows for job owner or when genie is assigned */}
+      {/* Chat component - shows for job owner or assigned genie */}
       {currentUserId &&
-        (job.user_id === currentUserId || job.assigned_genie) && (
+        (job.user_id === currentUserId ||
+          job.assigned_genie === currentUserId) && (
           <JobChat
             jobId={job.id}
             jobStatus={job.status}
             currentUserId={currentUserId}
+            jobOwnerId={job.user_id}
+            assignedGenieId={job.assigned_genie}
           />
         )}
     </article>

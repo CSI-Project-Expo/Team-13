@@ -6,6 +6,7 @@ import JobCard from "../components/JobCard";
 import Loader from "../components/Loader";
 import EmptyState from "../components/EmptyState";
 import RatingModal from "../components/RatingModal";
+import ButtonSpinner from "../components/ButtonSpinner";
 
 function SkeletonCard() {
   return (
@@ -18,50 +19,48 @@ function SkeletonCard() {
 }
 
 const TABS = [
-    { key: 'available', label: '🔍 Available Jobs' },
-    { key: 'my-jobs', label: '📋 My Assignments' },
-    { key: 'verification', label: '✅ Verification' },
+  { key: "available", label: "🔍 Available Jobs" },
+  { key: "my-jobs", label: "📋 My Assignments" },
+  { key: "verification", label: "✅ Verification" },
 ];
 
 export default function GenieDashboard() {
-    const { user, fetchMe } = useAuth();
-    const [tab, setTab] = useState('available');
-    const [jobs, setJobs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [actionId, setActionId] = useState(null);
-    const [rateUserJob, setRateUserJob] = useState(null);
-    const [isRating, setIsRating] = useState(false);
-    const [toast, setToast] = useState('');
-    const [verificationLoading, setVerificationLoading] = useState(false);
-    const [skillsInput, setSkillsInput] = useState('');
-    const [skillProofFiles, setSkillProofFiles] = useState([]);
-    const [documentFile, setDocumentFile] = useState(null);
+  const { user, fetchMe } = useAuth();
+  const [tab, setTab] = useState("available");
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState(null);
+  const [rateUserJob, setRateUserJob] = useState(null);
+  const [isRating, setIsRating] = useState(false);
+  const [toast, setToast] = useState("");
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [skillsInput, setSkillsInput] = useState("");
+  const [skillProofFiles, setSkillProofFiles] = useState([]);
+  const [documentFile, setDocumentFile] = useState(null);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3500);
   };
 
-    const loadJobs = useCallback(async () => {
-        if (tab === 'verification') {
-            setLoading(false);
-            return;
-        }
+  const loadJobs = useCallback(async () => {
+    if (tab === "verification") {
+      setLoading(false);
+      return;
+    }
 
-        setLoading(true);
-        try {
-            const endpoint =
-                tab === 'available'
-                    ? '/api/v1/jobs/available'
-                    : '/api/v1/jobs/my-jobs';
-            const data = await api.get(endpoint);
-            setJobs(Array.isArray(data) ? data : []);
-        } catch (err) {
-            showToast(`Error: ${err.message}`);
-        } finally {
-            setLoading(false);
-        }
-    }, [tab]);
+    setLoading(true);
+    try {
+      const endpoint =
+        tab === "available" ? "/api/v1/jobs/available" : "/api/v1/jobs/my-jobs";
+      const data = await api.get(endpoint);
+      setJobs(Array.isArray(data) ? data : []);
+    } catch (err) {
+      showToast(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [tab]);
 
   useEffect(() => {
     loadJobs();
@@ -139,56 +138,59 @@ export default function GenieDashboard() {
     }
   };
 
-    const getAction = (job) => {
-        if (tab === 'available') return { label: 'Accept Job', handler: handleAccept };
-        if (job.status === 'ACCEPTED') return { label: 'Start Job', handler: handleStart };
-        if (job.status === 'IN_PROGRESS') return { label: 'Mark Complete', handler: handleComplete };
-        if (job.status === 'COMPLETED' && !job.genie_rating) {
-            return { label: 'Rate User', handler: () => setRateUserJob(job) };
-        }
-        return null;
-    };
+  const getAction = (job) => {
+    if (tab === "available")
+      return { label: "Accept Job", handler: handleAccept };
+    if (job.status === "ACCEPTED")
+      return { label: "Start Job", handler: handleStart };
+    if (job.status === "IN_PROGRESS")
+      return { label: "Mark Complete", handler: handleComplete };
+    if (job.status === "COMPLETED" && !job.genie_rating) {
+      return { label: "Rate User", handler: () => setRateUserJob(job) };
+    }
+    return null;
+  };
 
-    const handleVerificationSubmit = async (event) => {
-        event.preventDefault();
-        if (!documentFile) {
-            showToast('Please upload a verification document.');
-            return;
-        }
+  const handleVerificationSubmit = async (event) => {
+    event.preventDefault();
+    if (!documentFile) {
+      showToast("Please upload a verification document.");
+      return;
+    }
 
-        const skills = skillsInput
-            .split(',')
-            .map((item) => item.trim())
-            .filter(Boolean);
+    const skills = skillsInput
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
 
-        if (skills.length === 0) {
-            showToast('Please add at least one skill.');
-            return;
-        }
+    if (skills.length === 0) {
+      showToast("Please add at least one skill.");
+      return;
+    }
 
-        setVerificationLoading(true);
-        try {
-            const formData = new FormData();
-            formData.append('document', documentFile);
-            formData.append('skills', JSON.stringify(skills));
+    setVerificationLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("document", documentFile);
+      formData.append("skills", JSON.stringify(skills));
 
-            if (skillProofFiles.length > 0) {
-                skillProofFiles.forEach((file) => {
-                    formData.append('skill_proof_docs', file);
-                });
-            }
+      if (skillProofFiles.length > 0) {
+        skillProofFiles.forEach((file) => {
+          formData.append("skill_proof_docs", file);
+        });
+      }
 
-            await api.postForm('/api/v1/users/verification/apply', formData);
-            showToast('Verification submitted and sent for review.');
-            setDocumentFile(null);
-            setSkillsInput('');
-            setSkillProofFiles([]);
-        } catch (err) {
-            showToast(`Error: ${err.message}`);
-        } finally {
-            setVerificationLoading(false);
-        }
-    };
+      await api.postForm("/api/v1/users/verification/apply", formData);
+      showToast("Verification submitted and sent for review.");
+      setDocumentFile(null);
+      setSkillsInput("");
+      setSkillProofFiles([]);
+    } catch (err) {
+      showToast(`Error: ${err.message}`);
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
 
   return (
     <div className="page">
@@ -216,81 +218,103 @@ export default function GenieDashboard() {
           ))}
         </div>
 
-                {/* Content */}
-                {tab === 'verification' ? (
-                    <section className="card" style={{ marginTop: 16 }}>
-                        <h2 className="section-title">Genie Verification</h2>
-                        <form onSubmit={handleVerificationSubmit} className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">Document</label>
-                                <input
-                                    className="form-input"
-                                    type="file"
-                                    onChange={(event) => setDocumentFile(event.target.files?.[0] || null)}
-                                    required
-                                />
-                            </div>
+        {/* Content */}
+        {tab === "verification" ? (
+          <section className="card" style={{ marginTop: 16 }}>
+            <h2 className="section-title">Genie Verification</h2>
+            <form onSubmit={handleVerificationSubmit} className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Document</label>
+                <input
+                  className="form-input"
+                  type="file"
+                  onChange={(event) =>
+                    setDocumentFile(event.target.files?.[0] || null)
+                  }
+                  required
+                />
+              </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Skills (comma separated)</label>
-                                <input
-                                    className="form-input"
-                                    type="text"
-                                    placeholder="Plumbing, Electrician"
-                                    value={skillsInput}
-                                    onChange={(event) => setSkillsInput(event.target.value)}
-                                    required
-                                />
-                            </div>
+              <div className="form-group">
+                <label className="form-label">Skills (comma separated)</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  placeholder="Plumbing, Electrician"
+                  value={skillsInput}
+                  onChange={(event) => setSkillsInput(event.target.value)}
+                  required
+                />
+              </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Skill Proof Documents (optional)</label>
-                                <input
-                                    className="form-input"
-                                    type="file"
-                                    multiple
-                                    onChange={(event) => setSkillProofFiles(Array.from(event.target.files || []))}
-                                />
-                            </div>
+              <div className="form-group">
+                <label className="form-label">
+                  Skill Proof Documents (optional)
+                </label>
+                <input
+                  className="form-input"
+                  type="file"
+                  multiple
+                  onChange={(event) =>
+                    setSkillProofFiles(Array.from(event.target.files || []))
+                  }
+                />
+              </div>
 
-                            <div>
-                                <button className="btn btn--primary" type="submit" disabled={verificationLoading}>
-                                    {verificationLoading ? 'Submitting...' : 'Submit Verification'}
-                                </button>
-                            </div>
-                        </form>
-                    </section>
-                ) : loading ? (
-                    <div className="job-grid">
-                        {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
-                    </div>
-                ) : jobs.length === 0 ? (
-                    <EmptyState
-                        icon={tab === 'available' ? '🔍' : '📋'}
-                        title={tab === 'available' ? 'No available jobs' : 'No assignments yet'}
-                        message={
-                            tab === 'available'
-                                ? 'Check back soon — new jobs are posted regularly.'
-                                : 'Accept a job to see it here.'
-                        }
-                    />
-                ) : (
-                    <div className="job-grid">
-                        {jobs.map((job) => {
-                            const action = getAction(job);
-                            return (
-                                <JobCard
-                                    key={job.id}
-                                    job={job}
-                                    onAction={action?.handler}
-                                    actionLabel={action?.label}
-                                    loading={actionId === job.id}
-                                />
-                            );
-                        })}
-                    </div>
-                )}
-            </main>
+              <div>
+                <button
+                  className="btn btn--primary"
+                  type="submit"
+                  disabled={verificationLoading}
+                >
+                  {verificationLoading ? (
+                    <>
+                      <ButtonSpinner />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Verification"
+                  )}
+                </button>
+              </div>
+            </form>
+          </section>
+        ) : loading ? (
+          <div className="job-grid">
+            {[...Array(4)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : jobs.length === 0 ? (
+          <EmptyState
+            icon={tab === "available" ? "🔍" : "📋"}
+            title={
+              tab === "available" ? "No available jobs" : "No assignments yet"
+            }
+            message={
+              tab === "available"
+                ? "Check back soon — new jobs are posted regularly."
+                : "Accept a job to see it here."
+            }
+          />
+        ) : (
+          <div className="job-grid">
+            {jobs.map((job) => {
+              const action = getAction(job);
+              return (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onAction={action?.handler}
+                  actionLabel={action?.label}
+                  loading={actionId === job.id}
+                  currentUserId={user?.id}
+                />
+              );
+            })}
+          </div>
+        )}
+      </main>
 
       {rateUserJob && (
         <RatingModal
