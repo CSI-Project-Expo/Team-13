@@ -1186,6 +1186,7 @@ select {
 .auth-card__brand {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin-bottom: 28px;
 }
@@ -1195,9 +1196,6 @@ select {
   height: 120px;
   transition: var(--transition);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  border-radius: 4px;
-  background: white;
-  padding: 2px;
 }
 
 .auth-card__brand:hover .navbar__brand-icon {
