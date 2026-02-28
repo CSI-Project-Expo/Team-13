@@ -255,20 +255,11 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     };
   }, []);
 
-  // Generate static map image URL (lightweight, no iframe)
-  const getStaticMapUrl = () => {
-    if (!location) {
-      return null;
-    }
-
+  // Generate embeddable Google map URL
+  const getEmbeddedMapUrl = () => {
+    if (!location) return null;
     const { latitude, longitude } = location;
-    // Using static map tile from OpenStreetMap
-    const zoom = 15;
-    const width = 600;
-    const height = 300;
-
-    // Simple static tile approach
-    return `https://static-maps.yandex.ru/1.x/?lang=en_US&ll=${longitude},${latitude}&z=${zoom}&l=map&size=${width},${height}&pt=${longitude},${latitude},pm2rdm`;
+    return `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
   };
 
   // Generate link to open in full map
@@ -415,16 +406,17 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
       >
         {location ? (
           <>
-            <img
-              src={getStaticMapUrl()}
-              alt="Map"
+            <iframe
+              src={getEmbeddedMapUrl()}
+              title="Live Google Map"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
               style={{
                 display: "block",
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                border: 0,
               }}
-              onError={(e) => (e.target.style.display = "none")}
             />
             <a
               href={getFullMapUrl()}

@@ -63,6 +63,26 @@ async def init_db():
             await conn.execute(text("""
                 CREATE INDEX IF NOT EXISTS idx_genie_locations_job_id ON genie_locations(job_id)
             """))
+            # Keep only the latest location row per job, then enforce uniqueness
+            await conn.execute(text("""
+                DELETE FROM genie_locations
+                WHERE id IN (
+                    SELECT id FROM (
+                        SELECT
+                            id,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY job_id
+                                ORDER BY updated_at DESC, id DESC
+                            ) AS rn
+                        FROM genie_locations
+                    ) ranked
+                    WHERE ranked.rn > 1
+                )
+            """))
+            await conn.execute(text("""
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_genie_locations_job_id
+                ON genie_locations(job_id)
+            """))
         logger.info("Database connection established successfully")
     except Exception as e:
         logger.warning(f"Database connection failed: {e}")

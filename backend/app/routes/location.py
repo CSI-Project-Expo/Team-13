@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, and_
+from sqlalchemy import select
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
@@ -82,7 +82,10 @@ async def update_location(
 
     # Check if location record exists for this job
     result = await db.execute(
-        select(GenieLocation).where(GenieLocation.job_id == job_id)
+        select(GenieLocation)
+        .where(GenieLocation.job_id == job_id)
+        .order_by(GenieLocation.updated_at.desc())
+        .limit(1)
     )
     existing_location = result.scalar_one_or_none()
     
@@ -145,7 +148,10 @@ async def get_location(
     
     # Get location
     result = await db.execute(
-        select(GenieLocation).where(GenieLocation.job_id == job_id)
+        select(GenieLocation)
+        .where(GenieLocation.job_id == job_id)
+        .order_by(GenieLocation.updated_at.desc())
+        .limit(1)
     )
     location = result.scalar_one_or_none()
     
