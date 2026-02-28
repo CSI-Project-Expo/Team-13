@@ -14,12 +14,21 @@ from app.models.job import Job, JobStatus
 from app.models.location import GenieLocation
 
 router = APIRouter()
+MAX_LOCATION_ACCURACY_METERS = 9999.99
+
+
+def _normalize_accuracy(accuracy: Optional[float]) -> Optional[float]:
+    if accuracy is None:
+        return None
+    if accuracy < 0:
+        return 0.0
+    return min(accuracy, MAX_LOCATION_ACCURACY_METERS)
 
 
 class LocationUpdateRequest(BaseModel):
     latitude: float = Field(..., ge=-90, le=90, description="Latitude coordinate")
     longitude: float = Field(..., ge=-180, le=180, description="Longitude coordinate")
-    accuracy: Optional[float] = Field(None, ge=0, le=10000, description="Accuracy in meters")
+    accuracy: Optional[float] = Field(None, ge=0, description="Accuracy in meters")
 
 
 class LocationResponse(BaseModel):
@@ -63,12 +72,14 @@ async def update_location(
         )
     
     # Only update location for active jobs
-    if job.status not in [JobStatus.ACCEPTED, JobStatus.IN_PROGRESS]:
+    if job.status != JobStatus.IN_PROGRESS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Can only update location for accepted or in-progress jobs"
+            detail="Can only update location for in-progress jobs"
         )
     
+    normalized_accuracy = _normalize_accuracy(location_data.accuracy)
+
     # Check if location record exists for this job
     result = await db.execute(
         select(GenieLocation).where(GenieLocation.job_id == job_id)
@@ -79,7 +90,7 @@ async def update_location(
         # Update existing location
         existing_location.latitude = location_data.latitude
         existing_location.longitude = location_data.longitude
-        existing_location.accuracy = location_data.accuracy
+        existing_location.accuracy = normalized_accuracy
         existing_location.updated_at = datetime.utcnow()
         await db.commit()
         await db.refresh(existing_location)
@@ -91,7 +102,7 @@ async def update_location(
             genie_id=current_user.id,
             latitude=location_data.latitude,
             longitude=location_data.longitude,
-            accuracy=location_data.accuracy,
+            accuracy=normalized_accuracy,
             updated_at=datetime.utcnow()
         )
         db.add(new_location)

@@ -33,27 +33,38 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const watchIdRef = useRef(null);
   const pollIntervalRef = useRef(null);
   const isMountedRef = useRef(false);
-  const abortControllerRef = useRef(null);
 
   const isTrackingActive = jobStatus === "IN_PROGRESS";
 
+  useEffect(() => {
+    console.log("[LiveLocationMap] props/state", {
+      jobId,
+      role,
+      jobStatus,
+      isTrackingActive,
+      isExpanded,
+      isSharing,
+    });
+  }, [jobId, role, jobStatus, isTrackingActive, isExpanded, isSharing]);
+
   // Fetch with deduplication and abort support
   const fetchLocation = useCallback(async () => {
-    if (!jobId || role !== "user" || !isTrackingActive || !isMountedRef.current)
+    if (!jobId || role !== "user" || !isTrackingActive || !isMountedRef.current) {
+      console.log("[LiveLocationMap] fetch skipped", {
+        jobId,
+        role,
+        isTrackingActive,
+        isMounted: isMountedRef.current,
+      });
       return;
-
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
     }
 
-    abortControllerRef.current = new AbortController();
-
     try {
+      console.log("[LiveLocationMap] fetching location", { jobId });
       const data = await dedupedFetch(`/api/v1/jobs/${jobId}/location`);
+      console.log("[LiveLocationMap] fetch response", { jobId, data });
       if (isMountedRef.current && data) {
         setLocation(data);
         setError(null);
@@ -61,6 +72,12 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     } catch (err) {
       // Silently fail unless it's an abort
       if (err.name !== "AbortError" && isMountedRef.current) {
+        console.error("[LiveLocationMap] fetch failed", {
+          jobId,
+          status: err?.status,
+          message: err?.message,
+          data: err?.data,
+        });
         // Don't set error to prevent UI flicker
       }
     }
@@ -69,21 +86,79 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
   // Update location to backend (throttled for genie)
   const updateLocation = useCallback(
     async (position) => {
-      if (!jobId || role !== "genie" || !isTrackingActive) return;
+      if (!jobId || role !== "genie" || !isTrackingActive) {
+        console.log("[LiveLocationMap] update skipped", {
+          jobId,
+          role,
+          isTrackingActive,
+        });
+        return;
+      }
 
-      const { latitude, longitude, accuracy } = position.coords;
+      const { latitude, longitude, accuracy } = position?.coords || {};
+      console.log("[LiveLocationMap] GPS raw coords", {
+        latitude,
+        longitude,
+        accuracy,
+      });
+      const safeLatitude = Number(latitude);
+      const safeLongitude = Number(longitude);
+      const parsedAccuracy = Number(accuracy);
+      const safeAccuracy =
+        accuracy == null || Number.isNaN(parsedAccuracy) || parsedAccuracy < 0
+          ? null
+          : parsedAccuracy;
 
-      try {
-        await api.post(`/api/v1/jobs/${jobId}/location`, {
+      if (
+        !Number.isFinite(safeLatitude) ||
+        !Number.isFinite(safeLongitude) ||
+        safeLatitude < -90 ||
+        safeLatitude > 90 ||
+        safeLongitude < -180 ||
+        safeLongitude > 180
+      ) {
+        console.error("[LiveLocationMap] invalid GPS payload", {
           latitude,
           longitude,
-          accuracy: accuracy || null,
+          accuracy,
+          safeLatitude,
+          safeLongitude,
+          safeAccuracy,
         });
         if (isMountedRef.current) {
-          setLocation({ latitude, longitude, accuracy });
+          setError("Invalid GPS data. Please refresh location.");
+        }
+        return;
+      }
+
+      try {
+        const payload = {
+          latitude: safeLatitude,
+          longitude: safeLongitude,
+          accuracy: safeAccuracy,
+        };
+        console.log("[LiveLocationMap] posting location", { jobId, payload });
+        await api.post(`/api/v1/jobs/${jobId}/location`, {
+          latitude: safeLatitude,
+          longitude: safeLongitude,
+          accuracy: safeAccuracy,
+        });
+        console.log("[LiveLocationMap] location post success", { jobId });
+        if (isMountedRef.current) {
+          setLocation({
+            latitude: safeLatitude,
+            longitude: safeLongitude,
+            accuracy: safeAccuracy,
+          });
           setError(null);
         }
       } catch (err) {
+        console.error("[LiveLocationMap] location post failed", {
+          jobId,
+          status: err?.status,
+          message: err?.message,
+          data: err?.data,
+        });
         if (isMountedRef.current) {
           setError("Failed to update location");
         }
@@ -95,16 +170,22 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
   // Start location sharing for genie
   const startSharing = useCallback(() => {
     if (!navigator.geolocation) {
+      console.error("[LiveLocationMap] geolocation unsupported");
       setError("Geolocation not supported");
       return;
     }
 
+    console.log("[LiveLocationMap] startSharing called", { jobId, role, jobStatus });
     setIsSharing(true);
 
     // Get initial position once, don't watch continuously to save resources
     navigator.geolocation.getCurrentPosition(
       updateLocation,
       (err) => {
+        console.error("[LiveLocationMap] geolocation error", {
+          code: err?.code,
+          message: err?.message,
+        });
         if (isMountedRef.current) {
           setError("Location permission denied");
         }
@@ -116,22 +197,11 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     // Genie can manually refresh if needed
   }, [updateLocation]);
 
-  const stopSharing = useCallback(() => {
-    if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
-      watchIdRef.current = null;
-    }
-    setIsSharing(false);
-  }, []);
-
   // Mount/unmount tracking
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
     };
   }, []);
 
@@ -166,26 +236,22 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     }
   }, [role, isTrackingActive, isExpanded, fetchLocation]);
 
-  // Genie sharing - only when expanded
+  // Genie sharing - active during IN_PROGRESS (independent of panel expansion)
   useEffect(() => {
     if (
       role === "genie" &&
       isTrackingActive &&
-      isExpanded &&
       !isSharing &&
       isMountedRef.current
     ) {
       startSharing();
     }
-  }, [role, isTrackingActive, isExpanded, isSharing, startSharing]);
+  }, [role, isTrackingActive, isSharing, startSharing]);
 
   // Cleanup
   useEffect(() => {
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-      if (watchIdRef.current !== null)
-        navigator.geolocation.clearWatch(watchIdRef.current);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, []);
 
@@ -202,14 +268,14 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     const height = 300;
 
     // Simple static tile approach
-    return `https://staticmap.openstreetmap.de/staticmap.php?center=${latitude},${longitude}&zoom=${zoom}&size=${width}x${height}&maptype=mapnik&markers=${latitude},${longitude},ol-marker`;
+    return `https://static-maps.yandex.ru/1.x/?lang=en_US&ll=${longitude},${latitude}&z=${zoom}&l=map&size=${width},${height}&pt=${longitude},${latitude},pm2rdm`;
   };
 
   // Generate link to open in full map
   const getFullMapUrl = () => {
     if (!location) return "#";
     const { latitude, longitude } = location;
-    return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=16`;
+    return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
   };
 
   // Format last updated time
@@ -337,7 +403,7 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
         style={{
           position: "relative",
           width: "100%",
-          height: 200,
+          height: 250,
           borderRadius: "var(--radius-sm)",
           overflow: "hidden",
           border: "2px solid var(--border)",
@@ -352,7 +418,12 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
             <img
               src={getStaticMapUrl()}
               alt="Map"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{
+                display: "block",
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
               onError={(e) => (e.target.style.display = "none")}
             />
             <a

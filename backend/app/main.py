@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -62,6 +63,20 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "message": exc.detail,
             "type": "HTTPException"
         }
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle request validation errors with actionable details"""
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": True,
+            "message": "Request validation failed",
+            "type": "RequestValidationError",
+            "details": exc.errors(),
+        },
     )
 
 

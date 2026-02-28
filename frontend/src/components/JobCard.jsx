@@ -30,8 +30,8 @@ export default function JobCard({
       })
     : "";
 
-  // Show live location for ACCEPTED or IN_PROGRESS jobs
-  const showLiveLocation = ['ACCEPTED', 'IN_PROGRESS'].includes(job.status);
+  // Show live location only when job is in progress
+  const showLiveLocation = job.status === "IN_PROGRESS";
 
   return (
     <article className="job-card">
