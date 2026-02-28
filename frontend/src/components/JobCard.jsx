@@ -1,6 +1,8 @@
 import StatusBadge from "./StatusBadge";
 import JobChat from "./JobChat";
 import ButtonSpinner from "./ButtonSpinner";
+import LiveLocationMap from "./LiveLocationMap";
+import { useAuth } from "../hooks/useAuth";
 
 /**
  * Job card for listing views.
@@ -17,6 +19,7 @@ export default function JobCard({
   loading = false,
   currentUserId,
 }) {
+  const { role } = useAuth();
   const price =
     job.price != null ? `₹${Number(job.price).toFixed(2)}` : "Negotiable";
   const date = job.created_at
@@ -26,6 +29,9 @@ export default function JobCard({
         year: "numeric",
       })
     : "";
+
+  // Show live location for ACCEPTED or IN_PROGRESS jobs
+  const showLiveLocation = ['ACCEPTED', 'IN_PROGRESS'].includes(job.status);
 
   return (
     <article className="job-card">
@@ -67,6 +73,15 @@ export default function JobCard({
           </button>
         )}
       </div>
+
+      {/* Live Location Map - shows for active jobs when genie is assigned */}
+      {showLiveLocation && currentUserId && (
+        <LiveLocationMap 
+          jobId={job.id} 
+          role={role} 
+          jobStatus={job.status}
+        />
+      )}
 
       {/* Chat component - shows for job owner or assigned genie */}
       {currentUserId &&

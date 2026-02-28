@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 
 from app.database import init_db
-from app.routes import jobs, offers, wallet, admin, users, notifications, chat
+from app.routes import jobs, offers, wallet, admin, users, notifications, chat, location
 from app.utils.exceptions import BaseAPIException
 
 
@@ -81,6 +81,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 # Include routers
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["jobs"])
+app.include_router(location.router, prefix="/api/v1/jobs", tags=["location"])
 app.include_router(offers.router, prefix="/api/v1/offers", tags=["offers"])
 app.include_router(wallet.router, prefix="/api/v1/wallet", tags=["wallet"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
