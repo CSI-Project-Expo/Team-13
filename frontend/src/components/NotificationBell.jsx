@@ -178,7 +178,6 @@ export default function NotificationBell() {
                   style={{
                     padding: "12px 16px",
                     borderBottom: "2px solid var(--border)",
-                    cursor: "pointer",
                     transition: "var(--transition)",
                     background: !notification.is_read
                       ? "var(--accent-light)"
