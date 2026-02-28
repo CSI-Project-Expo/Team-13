@@ -3154,3 +3154,189 @@ select {
 .animated-chat__dots span:nth-child(2) {
   animation-delay: -0.16s;
 }
+/* ══════════════════════════════════════════════════════════
+   SCROLL-TO-TOP BUTTON
+   ══════════════════════════════════════════════════════════ */
+.scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  background: var(--accent);
+  border: 3px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 99;
+  font-size: 24px;
+  font-weight: 900;
+  color: white;
+  box-shadow: 6px 6px 0 var(--border);
+  transform: translateY(20px);
+}
+
+.scroll-to-top.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-4px);
+  box-shadow: 8px 8px 0 var(--border);
+  background: var(--accent-hover);
+}
+
+.scroll-to-top:active {
+  transform: translateY(0);
+  box-shadow: 3px 3px 0 var(--border);
+}
+
+@media (max-width: 640px) {
+  .scroll-to-top {
+    bottom: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   DEVICE MOCKUP ANIMATION
+   ══════════════════════════════════════════════════════════ */
+@keyframes floatDevice {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes pulseScreen {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.05);
+  }
+}
+
+.landing__device-frame {
+  animation: floatDevice 3s ease-in-out infinite, pulseScreen 4s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════
+   FLOW CARD CONNECTORS (Desktop)
+   ══════════════════════════════════════════════════════════ */
+.landing__flow-cards {
+  position: relative;
+}
+
+.landing__flow-card::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -28px;
+  width: 28px;
+  height: 3px;
+  background: linear-gradient(to right, var(--border), transparent);
+  transform: translateY(-50%);
+}
+
+.landing__flow-card:last-child::after {
+  display: none;
+}
+
+/* Arrow decoration on connectors */
+@media (min-width: 1025px) {
+  .landing__flow-card::after {
+    right: -32px;
+    width: 32px;
+  }
+  
+  .landing__flow-card::before {
+    content: "→";
+    position: absolute;
+    top: 50%;
+    right: -22px;
+    font-size: 20px;
+    color: var(--border);
+    transform: translateY(-50%);
+    font-weight: 900;
+    opacity: 0.4;
+  }
+  
+  .landing__flow-card:last-child::before {
+    display: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   TESTIMONIAL AVATAR IMPROVEMENTS
+   ══════════════════════════════════════════════════════════ */
+.landing__story-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--border);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 18px;
+  border: 3px solid var(--border);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Avatar image backgrounds - use actual images URL */
+.landing__story-avatar[data-avatar] {
+  background-color: transparent;
+  font-size: 0; /* Hide initials when using image */
+}
+
+.landing__story-avatar[data-avatar="jess"] {
+  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Jess&backgroundColor=ff6b9d');
+}
+
+.landing__story-avatar[data-avatar="amir"] {
+  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Amir&backgroundColor=ffe156');
+}
+
+.landing__story-avatar[data-avatar="maria"] {
+  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=4ecdc4');
+}
+
+.landing__story-avatar[data-avatar="carlos"] {
+  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos&backgroundColor=ff9a56');
+}
+
+.landing__story-avatar[data-avatar="priya"] {
+  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Priya&backgroundColor=ff6b9d');
+}
+
+.landing__story-avatar[data-avatar="jake"] {
+  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Jake&backgroundColor=4ecdc4');
+}
+
+.landing__story-avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+}

@@ -1,12 +1,27 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import AnimatedChat from "../components/AnimatedChat";
 import logo from "../assets/your-logo.png";
 
 export default function RoleSelect() {
   const navigate = useNavigate();
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const handleStart = (role) => {
     navigate(`/login?role=${role}`);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -276,7 +291,7 @@ export default function RoleSelect() {
                     Absolute lifesaver!&quot;
                   </blockquote>
                   <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar">J</div>
+                    <div className="landing__story-avatar" data-avatar="jess">J</div>
                     <span>— Jess, new in town</span>
                   </figcaption>
                 </figure>
@@ -287,7 +302,7 @@ export default function RoleSelect() {
                     fast, and the wallet makes payouts painless.&quot;
                   </blockquote>
                   <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar">A</div>
+                    <div className="landing__story-avatar" data-avatar="amir">A</div>
                     <span>— Amir, student &amp; Genie</span>
                   </figcaption>
                 </figure>
@@ -299,7 +314,7 @@ export default function RoleSelect() {
                     directly through the app!&quot;
                   </blockquote>
                   <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar">M</div>
+                    <div className="landing__story-avatar" data-avatar="maria">M</div>
                     <span>— Maria, homeowner</span>
                   </figcaption>
                 </figure>
@@ -311,7 +326,7 @@ export default function RoleSelect() {
                     Simple.&quot;
                   </blockquote>
                   <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar">C</div>
+                    <div className="landing__story-avatar" data-avatar="carlos">C</div>
                     <span>— Carlos, delivery Genie</span>
                   </figcaption>
                 </figure>
@@ -322,7 +337,7 @@ export default function RoleSelect() {
                     at 3pm, had them delivered by 4pm. This app is magic.&quot;
                   </blockquote>
                   <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar">P</div>
+                    <div className="landing__story-avatar" data-avatar="priya">P</div>
                     <span>— Priya, busy professional</span>
                   </figcaption>
                 </figure>
@@ -334,7 +349,7 @@ export default function RoleSelect() {
                     accepting.&quot;
                   </blockquote>
                   <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar">J</div>
+                    <div className="landing__story-avatar" data-avatar="jake">J</div>
                     <span>— Jake, weekend Genie</span>
                   </figcaption>
                 </figure>
@@ -518,6 +533,16 @@ export default function RoleSelect() {
           </footer>
         </main>
       </div>
+
+      {/* Scroll-to-Top Button */}
+      <button
+        className={`scroll-to-top ${showScrollTop ? "show" : ""}`}
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+        title="Back to top"
+      >
+        ↑
+      </button>
     </div>
   );
 }
