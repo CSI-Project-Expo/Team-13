@@ -68,6 +68,8 @@ export function AuthProvider({ children }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
                 if (event === 'SIGNED_IN' && session?.access_token) {
+                    let accessToken = session.access_token;
+
                     // For OAuth logins, ensure user has a role in metadata
                     const user = session.user;
                     const hasRole = user?.user_metadata?.role;
@@ -84,9 +86,14 @@ export function AuthProvider({ children }) {
                                 name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]
                             }
                         });
+
+                        const { data: refreshedSession } = await supabase.auth.getSession();
+                        if (refreshedSession?.session?.access_token) {
+                            accessToken = refreshedSession.session.access_token;
+                        }
                     }
                     
-                    await fetchMe(session.access_token);
+                    await fetchMe(accessToken);
                 } else if (event === 'SIGNED_OUT') {
                     clearSession();
                 }

@@ -19,6 +19,11 @@ router = APIRouter()
 UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "genie_docs"
 
 
+def _coerce_role(raw_role: str | None) -> str:
+    role = (raw_role or "user").strip().lower()
+    return role if role in ("user", "genie", "admin") else "user"
+
+
 @router.get("/me")
 async def get_me(
     payload: dict = Depends(verify_jwt_token),
@@ -36,13 +41,20 @@ async def get_me(
     result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))
     user = result.scalar_one_or_none()
 
+    meta = payload.get("user_metadata") or payload.get("raw_user_meta_data") or {}
+    app_meta = payload.get("app_metadata") or payload.get("raw_app_meta_data") or {}
+    token_name = (
+        meta.get("name")
+        or meta.get("full_name")
+        or payload.get("name")
+        or ""
+    ).strip()
+    token_role = _coerce_role(meta.get("role") or app_meta.get("role") or payload.get("role"))
+
     # ── First login: auto-create profile from Supabase metadata ─────────────
     if not user:
-        meta = payload.get("user_metadata") or {}
-        name = meta.get("name") or "User"
-        role = meta.get("role") or "user"
-        if role not in ("user", "genie", "admin"):
-            role = "user"
+        name = token_name or "User"
+        role = token_role
 
         try:
             user = User(id=uuid.UUID(user_id), name=name, role=role)
@@ -57,6 +69,24 @@ async def get_me(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to create user profile.",
             )
+    else:
+        should_update_name = bool(token_name) and (
+            not (user.name or "").strip()
+            or (user.name or "").strip().lower() in {"user", "unnamed user"}
+        )
+        current_role = _coerce_role(user.role)
+        should_update_role = (
+            (not (user.role or "").strip() and bool(token_role))
+            or (current_role == "user" and token_role in {"genie", "admin"})
+        )
+
+        if should_update_name or should_update_role:
+            if should_update_name:
+                user.name = token_name
+            if should_update_role:
+                user.role = token_role
+            await db.commit()
+            await db.refresh(user)
 
     genie_is_verified = False
     verification_status = None
