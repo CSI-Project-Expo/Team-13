@@ -4,6 +4,7 @@ import { supabase } from "../services/supabaseClient";
 import { useAuth } from "../hooks/useAuth";
 import { api } from "../services/api";
 import ButtonSpinner from "../components/ButtonSpinner";
+import logo from "../assets/your-logo.png";
 
 export default function Register() {
   const { user, role, fetchMe } = useAuth();
@@ -80,8 +81,7 @@ export default function Register() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-card__brand">
-          <span className="navbar__brand-icon">🚀</span>
-          <span className="auth-card__brand-name">Do4U</span>
+          <img src={logo} alt="Do4U" className="navbar__brand-icon" />
         </div>
 
         <h2 className="auth-card__title">Create account</h2>

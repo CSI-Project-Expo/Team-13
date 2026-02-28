@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import NotificationBell from "./NotificationBell";
+import logo from "../assets/your-logo.png";
 
 const NAV_LINKS = {
   user: [
@@ -37,8 +38,7 @@ export default function Navbar() {
       <div className="navbar__inner">
         {/* Brand */}
         <Link to="/" className="navbar__brand">
-          <span className="navbar__brand-icon">🚀</span>
-          <span className="navbar__brand-name">Do4U</span>
+          <img src={logo} alt="Do4U" className="navbar__brand-icon" />
         </Link>
 
         {/* Links */}

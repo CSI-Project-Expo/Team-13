@@ -1,5 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import AnimatedChat from "../components/AnimatedChat";
+import logo from "../assets/your-logo.png";
 
 export default function RoleSelect() {
   const navigate = useNavigate();
@@ -14,8 +15,7 @@ export default function RoleSelect() {
         {/* Top nav */}
         <header className="landing__nav">
           <div className="landing__brand">
-            <span className="landing__brand-icon">🚀</span>
-            <span className="landing__brand-name">Do4U</span>
+            <img src={logo} alt="Do4U" className="landing__brand-icon" />
           </div>
 
           <nav className="landing__nav-links">
@@ -41,7 +41,7 @@ export default function RoleSelect() {
               className="btn btn--primary landing__nav-btn"
               onClick={() => handleStart("user")}
             >
-              Get Early Access
+              Browse Tasks
             </button>
           </div>
         </header>
@@ -68,13 +68,13 @@ export default function RoleSelect() {
                   className="btn btn--primary landing__hero-btn"
                   onClick={() => handleStart("user")}
                 >
-                  I need something done
+                  I Need Help
                 </button>
                 <button
                   className="btn btn--ghost landing__hero-btn"
                   onClick={() => handleStart("genie")}
                 >
-                  I want to be a Genie
+                  Meet Genies
                 </button>
               </div>
 
@@ -164,7 +164,7 @@ export default function RoleSelect() {
                 className="btn btn--primary landing__how-btn"
                 onClick={() => handleStart("user")}
               >
-                Start with your first task
+                See How It Works
               </button>
             </aside>
           </section>
@@ -209,7 +209,7 @@ export default function RoleSelect() {
                   className="btn btn--primary landing__cta-btn"
                   onClick={() => handleStart("user")}
                 >
-                  Get early access
+                  Join Do4U
                 </button>
                 <Link
                   to="/login?role=genie"

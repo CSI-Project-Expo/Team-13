@@ -810,8 +810,8 @@ select {
 .navbar__inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
-  height: 64px;
+  padding: 16px 24px;
+  height: 80px;
   display: flex;
   align-items: center;
   gap: 24px;
@@ -826,7 +826,15 @@ select {
 }
 
 .navbar__brand-icon {
-  font-size: 24px;
+  width: 120px;
+  height: 120px;
+  transition: var(--transition);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.navbar__brand:hover .navbar__brand-icon {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 4px 8px rgba(255,107,157,0.3));
 }
 
 .navbar__brand-name {
@@ -1182,6 +1190,21 @@ select {
   margin-bottom: 28px;
 }
 
+.auth-card__brand .navbar__brand-icon {
+  width: 120px;
+  height: 120px;
+  transition: var(--transition);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  border-radius: 4px;
+  background: white;
+  padding: 2px;
+}
+
+.auth-card__brand:hover .navbar__brand-icon {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 4px 8px rgba(255,107,157,0.3));
+}
+
 .auth-card__brand-name {
   font-size: 22px;
   font-weight: 700;
@@ -1306,13 +1329,14 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 18px;
+  padding: 16px 24px;
   border-radius: 18px;
   background: var(--color-neo-white);
   border: 2px solid var(--border);
   box-shadow:
     6px 6px 0 0 #000,
     0 18px 40px rgba(0, 0, 0, 0.12);
+  min-height: 80px;
 }
 
 .landing__brand {
@@ -1322,7 +1346,16 @@ select {
 }
 
 .landing__brand-icon {
-  font-size: 22px;
+  width: 120px;
+  height: 120px;
+  transition: var(--transition);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  border-radius: 4px;
+}
+
+.landing__brand:hover .landing__brand-icon {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 4px 8px rgba(255,107,157,0.3));
 }
 
 .landing__brand-name {
@@ -2443,6 +2476,26 @@ select {
   flex-direction: column;
   gap: 12px;
   flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding-right: 4px;
+}
+
+.animated-chat__messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.animated-chat__messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.animated-chat__messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.animated-chat__messages::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .animated-chat__row {

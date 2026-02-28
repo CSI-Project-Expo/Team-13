@@ -7,6 +7,7 @@ import Loader from "../components/Loader";
 import EmptyState from "../components/EmptyState";
 import RatingModal from "../components/RatingModal";
 import ButtonSpinner from "../components/ButtonSpinner";
+import logo from "../assets/your-logo.png";
 
 function SkeletonCard() {
   return (
@@ -95,7 +96,7 @@ export default function GenieDashboard() {
     setActionId(job.id);
     try {
       await api.post(`/api/v1/jobs/${job.id}/start`, {});
-      showToast("Job started! Good luck 🚀");
+      showToast(`Job started! Good luck <img src='${logo}' alt='Do4U' style={{width: '16px', height: '16px', verticalAlign: 'middle', marginLeft: '4px'}} />`);
       loadJobs();
     } catch (err) {
       showToast(`Error: ${err.message}`);
@@ -200,7 +201,7 @@ export default function GenieDashboard() {
           <div>
             <h1 className="page__title">Genie Dashboard</h1>
             <p className="page__subtitle">
-              Hello, {user?.name || "Genie"} 🧞‍♂️ (Do4U 🚀)
+              Hello, {user?.name || "Genie"} 🧞‍♂️ (Do4U <img src={logo} alt="Do4U" style={{width: '20px', height: '20px', verticalAlign: 'middle', marginLeft: '4px'}} />)
             </p>
           </div>
         </div>
