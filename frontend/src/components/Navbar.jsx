@@ -59,9 +59,11 @@ export default function Navbar() {
           {user && (
             <>
               <NotificationBell />
+              
+              {/* Desktop: Full user info */}
               <Link
                 to="/profile"
-                className="navbar__user"
+                className="navbar__user navbar__user--desktop"
                 style={{ textDecoration: "none" }}
               >
                 <span
@@ -99,7 +101,16 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-              <button className="btn btn--sm btn--ghost" onClick={handleLogout}>
+
+              {/* Mobile: Icon buttons */}
+              <Link to="/wallet" className="navbar__icon-btn" title="Wallet">
+                💰
+              </Link>
+              <Link to="/profile" className="navbar__icon-btn" title="Profile">
+                👤
+              </Link>
+              
+              <button className="btn btn--sm btn--ghost navbar__logout-btn" onClick={handleLogout}>
                 Logout
               </button>
             </>

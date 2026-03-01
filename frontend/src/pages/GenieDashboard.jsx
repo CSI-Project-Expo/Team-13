@@ -262,59 +262,99 @@ export default function GenieDashboard() {
                 />
               </div>
 
-              <div>
-                <button
-                  className="btn btn--primary"
-                  type="submit"
-                  disabled={verificationLoading}
-                >
-                  {verificationLoading ? (
-                    <>
-                      <ButtonSpinner />
-                      Submitting...
-                    </>
-                  ) : (
-                    "Submit Verification"
-                  )}
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="btn btn--primary"
+                disabled={verificationLoading}
+              >
+                {verificationLoading ? (
+                  <>
+                    <ButtonSpinner />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Verification"
+                )}
+              </button>
             </form>
           </section>
-        ) : loading ? (
-          <div className="job-grid">
-            {[...Array(4)].map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : jobs.length === 0 ? (
-          <EmptyState
-            icon={tab === "available" ? "🔍" : "📋"}
-            title={
-              tab === "available" ? "No available jobs" : "No assignments yet"
-            }
-            message={
-              tab === "available"
-                ? "Check back soon — new jobs are posted regularly."
-                : "Accept a job to see it here."
-            }
-          />
         ) : (
-          <div className="job-grid">
-            {jobs.map((job) => {
-              const action = getAction(job);
-              return (
+          <div className="job-grid" style={{ marginTop: 16 }}>
+            {loading ? (
+              [...Array(4)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))
+            ) : jobs.length > 0 ? (
+              jobs.map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
-                  onAction={action?.handler}
-                  actionLabel={action?.label}
+                  onAction={getAction(job).handler}
+                  actionLabel={getAction(job).label}
                   loading={actionId === job.id}
                   currentUserId={user?.id}
                 />
-              );
-            })}
+              ))
+            ) : (
+              <EmptyState
+                icon={tab === "available" ? "🔍" : "📋"}
+                title={
+                  tab === "available"
+                    ? "No available jobs"
+                    : tab === "my-jobs"
+                    ? "No assignments yet"
+                    : "No verification data"
+                }
+                message={
+                  tab === "available"
+                    ? "Check back soon — new jobs are posted regularly."
+                    : tab === "my-jobs"
+                    ? "Accept a job to see it here."
+                    : "Complete your verification to start earning"
+                }
+              />
+            )}
           </div>
         )}
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="mobile-nav">
+          <div className="mobile-nav__inner">
+            <a
+              href="#available"
+              className={`mobile-nav__item ${tab === "available" ? "mobile-nav__item--active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setTab("available");
+              }}
+            >
+              <span className="mobile-nav__icon">🔍</span>
+              <span className="mobile-nav__label">Browse</span>
+            </a>
+            <a
+              href="#my-jobs"
+              className={`mobile-nav__item ${tab === "my-jobs" ? "mobile-nav__item--active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setTab("my-jobs");
+              }}
+            >
+              <span className="mobile-nav__icon">📋</span>
+              <span className="mobile-nav__label">My Jobs</span>
+            </a>
+            <a
+              href="#verification"
+              className={`mobile-nav__item ${tab === "verification" ? "mobile-nav__item--active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setTab("verification");
+              }}
+            >
+              <span className="mobile-nav__icon">✅</span>
+              <span className="mobile-nav__label">Verify</span>
+            </a>
+          </div>
+        </nav>
       </main>
 
       {rateUserJob && (

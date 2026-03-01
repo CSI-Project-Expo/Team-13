@@ -6,9 +6,90 @@ import logo from "../assets/your-logo.png";
 export default function RoleSelect() {
   const navigate = useNavigate();
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
+  const testimonials = [
+    {
+      rating: "⭐⭐⭐⭐⭐",
+      quote: "I posted a 'please save my moving day' task and had two Genies show up with a van in under an hour. Absolute lifesaver!",
+      avatar: "jess",
+      author: "Jess, new in town",
+      color: "pink",
+    },
+    {
+      rating: "⭐⭐⭐⭐⭐",
+      quote: "I run errands between classes. It's flexible, fast, and the wallet makes payouts painless.",
+      avatar: "amir",
+      author: "Amir, student & Genie",
+      color: "yellow",
+    },
+    {
+      rating: "⭐⭐⭐⭐⭐",
+      quote: "Found my go-to handyman through Do4U. Fixed my fence, hung shelves, and assembled furniture. Now I just text him directly through the app!",
+      avatar: "maria",
+      author: "Maria, homeowner",
+      color: "blue",
+    },
+    {
+      rating: "⭐⭐⭐⭐⭐",
+      quote: "The escrow system is genius. I don't worry about getting paid anymore. Job done = instant release. Simple.",
+      avatar: "carlos",
+      author: "Carlos, delivery Genie",
+      color: "orange",
+    },
+    {
+      rating: "⭐⭐⭐⭐⭐",
+      quote: "Needed groceries picked up while stuck at work. Posted at 3pm, had them delivered by 4pm. This app is magic.",
+      avatar: "priya",
+      author: "Priya, busy professional",
+      color: "pink",
+    },
+    {
+      rating: "⭐⭐⭐⭐⭐",
+      quote: "Made $400 last weekend doing yard cleanups. Love that I can choose which jobs to take and see ratings before accepting.",
+      avatar: "jake",
+      author: "Jake, weekend Genie",
+      color: "blue",
+    },
+  ];
 
   const handleStart = (role) => {
     navigate(`/login?role=${role}`);
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    handleSwipe();
+  };
+
+  const handleSwipe = () => {
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      setCarouselIndex((prev) => (prev + 1) % testimonials.length);
+    } else if (isRightSwipe) {
+      setCarouselIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    }
+  };
+
+  const nextSlide = () => {
+    setCarouselIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prevSlide = () => {
+    setCarouselIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  const goToSlide = (index) => {
+    setCarouselIndex(index);
   };
 
   useEffect(() => {
@@ -339,83 +420,76 @@ export default function RoleSelect() {
             </aside>
           </section>
 
-          {/* Stories / social proof */}
+          {/* Stories / social proof - Carousel on Mobile */}
           <section id="stories" className="landing__stories">
             <div className="landing__stories-inner">
               <h2 className="landing__stories-title">
                 What Do4U fans are saying
               </h2>
-              <div className="landing__stories-grid">
-                <figure className="landing__story-card landing__story-card--pink">
-                  <div className="landing__story-rating">⭐⭐⭐⭐⭐</div>
-                  <blockquote className="landing__story-quote">
-                    &quot;I posted a &apos;please save my moving day&apos; task
-                    and had two Genies show up with a van in under an hour.
-                    Absolute lifesaver!&quot;
-                  </blockquote>
-                  <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar" data-avatar="jess">J</div>
-                    <span>— Jess, new in town</span>
-                  </figcaption>
-                </figure>
-                <figure className="landing__story-card landing__story-card--yellow">
-                  <div className="landing__story-rating">⭐⭐⭐⭐⭐</div>
-                  <blockquote className="landing__story-quote">
-                    &quot;I run errands between classes. It&apos;s flexible,
-                    fast, and the wallet makes payouts painless.&quot;
-                  </blockquote>
-                  <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar" data-avatar="amir">A</div>
-                    <span>— Amir, student &amp; Genie</span>
-                  </figcaption>
-                </figure>
-                <figure className="landing__story-card landing__story-card--blue">
-                  <div className="landing__story-rating">⭐⭐⭐⭐⭐</div>
-                  <blockquote className="landing__story-quote">
-                    &quot;Found my go-to handyman through Do4U. Fixed my fence,
-                    hung shelves, and assembled furniture. Now I just text him
-                    directly through the app!&quot;
-                  </blockquote>
-                  <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar" data-avatar="maria">M</div>
-                    <span>— Maria, homeowner</span>
-                  </figcaption>
-                </figure>
-                <figure className="landing__story-card landing__story-card--orange">
-                  <div className="landing__story-rating">⭐⭐⭐⭐⭐</div>
-                  <blockquote className="landing__story-quote">
-                    &quot;The escrow system is genius. I don&apos;t worry about
-                    getting paid anymore. Job done = instant release.
-                    Simple.&quot;
-                  </blockquote>
-                  <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar" data-avatar="carlos">C</div>
-                    <span>— Carlos, delivery Genie</span>
-                  </figcaption>
-                </figure>
-                <figure className="landing__story-card landing__story-card--pink">
-                  <div className="landing__story-rating">⭐⭐⭐⭐⭐</div>
-                  <blockquote className="landing__story-quote">
-                    &quot;Needed groceries picked up while stuck at work. Posted
-                    at 3pm, had them delivered by 4pm. This app is magic.&quot;
-                  </blockquote>
-                  <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar" data-avatar="priya">P</div>
-                    <span>— Priya, busy professional</span>
-                  </figcaption>
-                </figure>
-                <figure className="landing__story-card landing__story-card--blue">
-                  <div className="landing__story-rating">⭐⭐⭐⭐⭐</div>
-                  <blockquote className="landing__story-quote">
-                    &quot;Made $400 last weekend doing yard cleanups. Love that
-                    I can choose which jobs to take and see ratings before
-                    accepting.&quot;
-                  </blockquote>
-                  <figcaption className="landing__story-author">
-                    <div className="landing__story-avatar" data-avatar="jake">J</div>
-                    <span>— Jake, weekend Genie</span>
-                  </figcaption>
-                </figure>
+              
+              {/* Carousel Container */}
+              <div className="landing__carousel-container">
+                <div 
+                  className="landing__stories-grid landing__carousel"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  {testimonials.map((testimonial, index) => (
+                    <figure 
+                      key={index}
+                      className={`landing__story-card landing__story-card--${testimonial.color} landing__carousel-slide ${
+                        index === carouselIndex ? 'active' : ''
+                      }`}
+                      style={{
+                        transform: `translateX(calc(-${carouselIndex * 100}% + ${carouselIndex * 24}px))`,
+                      }}
+                    >
+                      <div className="landing__story-rating">{testimonial.rating}</div>
+                      <blockquote className="landing__story-quote">
+                        &quot;{testimonial.quote}&quot;
+                      </blockquote>
+                      <figcaption className="landing__story-author">
+                        <div className="landing__story-avatar" data-avatar={testimonial.avatar}>
+                          {testimonial.avatar.charAt(0).toUpperCase()}
+                        </div>
+                        <span>— {testimonial.author}</span>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+
+                {/* Desktop Navigation - Arrows */}
+                <div className="landing__carousel-nav">
+                  <button 
+                    className="landing__carousel-btn landing__carousel-btn--prev"
+                    onClick={prevSlide}
+                    aria-label="Previous testimonial"
+                    title="Previous"
+                  >
+                    ←
+                  </button>
+                  <button 
+                    className="landing__carousel-btn landing__carousel-btn--next"
+                    onClick={nextSlide}
+                    aria-label="Next testimonial"
+                    title="Next"
+                  >
+                    →
+                  </button>
+                </div>
+
+                {/* Pagination Dots */}
+                <div className="landing__carousel-dots">
+                  {testimonials.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`landing__carousel-dot ${index === carouselIndex ? 'active' : ''}`}
+                      onClick={() => goToSlide(index)}
+                      aria-label={`Go to testimonial ${index + 1}`}
+                      title={`Slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </section>
@@ -605,6 +679,16 @@ export default function RoleSelect() {
         title="Back to top"
       >
         ↑
+      </button>
+
+      {/* Mobile Floating Action Button (FAB) */}
+      <button
+        className="landing__fab"
+        onClick={() => handleStart("user")}
+        aria-label="Sign up for Do4U"
+        title="Sign Up"
+      >
+        Sign Up
       </button>
     </div>
   );

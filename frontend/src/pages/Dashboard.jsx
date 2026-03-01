@@ -130,29 +130,92 @@ export default function Dashboard() {
               <SkeletonCard key={i} />
             ))}
           </div>
-        ) : jobs.length === 0 ? (
+        ) : jobs.length > 0 ? (
+          <div className="job-grid">
+            {jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                userType="user"
+                onAction={getAction(job).handler}
+                actionLabel={getAction(job).label}
+                loading={actionId === job.id}
+                currentUserId={user?.id}
+              />
+            ))}
+          </div>
+        ) : (
           <EmptyState
             icon="📋"
-            title="No jobs yet"
-            message="Post your first job and a Genie will pick it up."
+            title={
+              filter === "ALL"
+                ? "No jobs posted yet"
+                : `No ${filter.replace("_", " ").toLowerCase()} jobs`
+            }
+            message={
+              filter === "ALL"
+                ? "Create your first job to get started."
+                : `No jobs with status "${filter.replace("_", " ")}".`
+            }
           />
-        ) : (
-          <div className="job-grid">
-            {jobs.map((job) => {
-              const action = getAction(job);
-              return (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onAction={action?.handler}
-                  actionLabel={action?.label}
-                  loading={actionId === job.id}
-                  currentUserId={user?.id}
-                />
-              );
-            })}
-          </div>
         )}
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="mobile-nav">
+          <div className="mobile-nav__inner">
+            <a
+              href="#all"
+              className={`mobile-nav__item ${filter === "ALL" ? "mobile-nav__item--active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setFilter("ALL");
+              }}
+            >
+              <span className="mobile-nav__icon">📋</span>
+              <span className="mobile-nav__label">All</span>
+            </a>
+            <a
+              href="#posted"
+              className={`mobile-nav__item ${filter === "POSTED" ? "mobile-nav__item--active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setFilter("POSTED");
+              }}
+            >
+              <span className="mobile-nav__icon">📝</span>
+              <span className="mobile-nav__label">Posted</span>
+            </a>
+            <a
+              href="#in-progress"
+              className={`mobile-nav__item ${filter === "IN_PROGRESS" ? "mobile-nav__item--active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setFilter("IN_PROGRESS");
+              }}
+            >
+              <span className="mobile-nav__icon">⚡</span>
+              <span className="mobile-nav__label">Active</span>
+            </a>
+            <a
+              href="#completed"
+              className={`mobile-nav__item ${filter === "COMPLETED" ? "mobile-nav__item--active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setFilter("COMPLETED");
+              }}
+            >
+              <span className="mobile-nav__icon">✅</span>
+              <span className="mobile-nav__label">Done</span>
+            </a>
+            <Link
+              to="/create-job"
+              className="mobile-nav__item"
+            >
+              <span className="mobile-nav__icon">➕</span>
+              <span className="mobile-nav__label">New</span>
+            </Link>
+          </div>
+        </nav>
       </main>
 
       {toast && <div className="toast">{toast}</div>}
