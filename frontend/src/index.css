@@ -65,6 +65,7 @@
 
   /* Cursor */
   --cursor-default: url("/cursor.png"), auto;
+  --hover-cursor: url("/pointer.png"), auto;
 }
 
 /* ── Reset & Base ────────────────────────────────────────── */
@@ -98,6 +99,7 @@ a {
   text-decoration: none;
   transition: var(--transition);
   font-weight: 600;
+  cursor: var(--hover-cursor);
 }
 
 a:hover {
@@ -108,6 +110,7 @@ button {
   font-family: var(--font);
   border: none;
   background: none;
+  cursor: var(--hover-cursor);
 }
 
 input,
@@ -146,6 +149,7 @@ select {
   border: var(--border-w) solid var(--border);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  cursor: var(--hover-cursor);
 }
 
 .btn:disabled {
@@ -165,6 +169,7 @@ select {
   color: var(--text-inverse);
   box-shadow: 1px 1px 0 var(--border);
   transform: translate(2px, 2px);
+  cursor: var(--hover-cursor);
 }
 
 .btn--primary:active:not(:disabled) {
@@ -184,6 +189,7 @@ select {
   color: var(--text);
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--border);
+  cursor: var(--hover-cursor);
 }
 
 .btn--ghost:active:not(:disabled) {
@@ -218,6 +224,7 @@ select {
   background: var(--bg);
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--border);
+  cursor: var(--hover-cursor);
 }
 
 .btn--google:active:not(:disabled) {
@@ -602,6 +609,7 @@ select {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   border-right: var(--border-w) solid var(--border);
+  cursor: var(--hover-cursor);
 }
 
 .toggle-btn:last-child {
@@ -640,6 +648,7 @@ select {
   text-transform: uppercase;
   letter-spacing: 0.02em;
   border-right: var(--border-w) solid var(--border);
+  cursor: var(--hover-cursor);
 }
 
 .filter-tab:last-child {
@@ -672,6 +681,7 @@ select {
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  cursor: var(--hover-cursor);
 }
 
 .stat-card::before {
@@ -770,6 +780,7 @@ select {
 .admin-table__row {
   background: var(--surface);
   transition: background 0.15s;
+  cursor: var(--hover-cursor);
 }
 
 .admin-table__row:hover {
@@ -823,6 +834,7 @@ select {
   gap: 8px;
   text-decoration: none;
   flex-shrink: 0;
+  cursor: var(--hover-cursor);
 }
 
 .navbar__brand-icon {
@@ -863,6 +875,7 @@ select {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   border: 2px solid transparent;
+  cursor: var(--hover-cursor);
 }
 
 .navbar__link:hover {
@@ -905,6 +918,7 @@ select {
     );
   z-index: -1;
   filter: blur(1px);
+  cursor: var(--hover-cursor);
 }
 
 .navbar__link--active {
@@ -1021,6 +1035,7 @@ select {
   flex-direction: column;
   gap: 12px;
   position: relative;
+  cursor: var(--hover-cursor);
 }
 
 .job-card:hover {
@@ -1201,6 +1216,7 @@ select {
 .auth-card__brand:hover .navbar__brand-icon {
   transform: scale(1.1) rotate(5deg);
   filter: drop-shadow(0 4px 8px rgba(255, 107, 157, 0.3));
+  cursor: var(--hover-cursor);
 }
 
 .auth-card__brand-name {
@@ -1271,6 +1287,7 @@ select {
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
+  cursor: var(--hover-cursor);
 }
 
 .link:hover {
@@ -1341,7 +1358,7 @@ select {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+  cursor: var(--hover-cursor);
 }
 
 .landing__brand-icon {
@@ -1355,6 +1372,7 @@ select {
 .landing__brand:hover .landing__brand-icon {
   transform: scale(1.08) rotate(3deg);
   filter: drop-shadow(0 4px 8px rgba(255, 107, 157, 0.3));
+  cursor: var(--hover-cursor);
 }
 
 .landing__brand-name {
@@ -1383,6 +1401,7 @@ select {
   border-radius: 999px;
   transition: var(--transition);
   font-size: 13px;
+  cursor: var(--hover-cursor);
 }
 
 .landing__nav-link:hover {
@@ -1425,6 +1444,7 @@ select {
     );
   z-index: -1;
   filter: blur(1px);
+  cursor: var(--hover-cursor);
 }
 
 .landing__nav-cta {
@@ -1556,6 +1576,7 @@ select {
   min-height: 360px;
   display: flex;
   flex-direction: column;
+  cursor: var(--hover-cursor);
 }
 
 .landing__flow-card:nth-child(odd) {
@@ -1816,6 +1837,7 @@ select {
   flex-direction: column;
   gap: 10px;
   height: calc(100% - 24px);
+  cursor: var(--hover-cursor);
 }
 
 .landing__chat-bubble {
@@ -1922,6 +1944,7 @@ select {
   border: 3px solid var(--border);
   box-shadow: 6px 6px 0 var(--border);
   transition: all 0.2s ease;
+  cursor: var(--hover-cursor);
 }
 
 .landing__card:hover {
@@ -2045,6 +2068,7 @@ select {
   flex-direction: column;
   gap: 12px;
   min-height: 200px;
+  cursor: var(--hover-cursor);
 }
 
 .landing__story-card:nth-child(odd) {
@@ -2231,6 +2255,7 @@ select {
   color: white;
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: var(--hover-cursor);
 }
 
 .landing__footer-social-link:hover {
@@ -2264,6 +2289,7 @@ select {
   transition: all 0.2s;
   display: inline-block;
   position: relative;
+  cursor: var(--hover-cursor);
 }
 
 .landing__footer-link:hover {
@@ -2357,6 +2383,7 @@ select {
   transition: var(--transition);
   text-align: center;
   box-shadow: var(--shadow-md);
+  cursor: var(--hover-cursor);
 }
 
 .role-tile:hover {
@@ -2604,6 +2631,7 @@ select {
 .notification-dropdown-container .overflow-y-auto::-webkit-scrollbar-thumb {
   background-color: var(--border);
   border-radius: 3px;
+  cursor: var(--hover-cursor);
 }
 
 .notification-dropdown-container
@@ -2616,6 +2644,7 @@ select {
   .notification-dropdown-container
   .overflow-y-auto::-webkit-scrollbar-thumb {
   background-color: #374151;
+  cursor: var(--hover-cursor);
 }
 
 .dark
@@ -3000,6 +3029,7 @@ select {
 /* Subtle pulse effect for the device frame */
 .landing__device-frame {
   transition: transform 0.3s ease;
+  cursor: var(--hover-cursor);
 }
 
 .landing__device-frame:hover {
@@ -3138,6 +3168,7 @@ select {
 .animated-chat__messages::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
+  cursor: var(--hover-cursor);
 }
 
 .animated-chat__messages::-webkit-scrollbar-thumb:hover {
@@ -3254,7 +3285,7 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: var(--hover-cursor);
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3297,7 +3328,8 @@ select {
    DEVICE MOCKUP ANIMATION
    ══════════════════════════════════════════════════════════ */
 @keyframes floatDevice {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -3306,7 +3338,8 @@ select {
 }
 
 @keyframes pulseScreen {
-  0%, 100% {
+  0%,
+  100% {
     filter: brightness(1);
   }
   50% {
@@ -3315,7 +3348,9 @@ select {
 }
 
 .landing__device-frame {
-  animation: floatDevice 3s ease-in-out infinite, pulseScreen 4s ease-in-out infinite;
+  animation:
+    floatDevice 3s ease-in-out infinite,
+    pulseScreen 4s ease-in-out infinite;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -3346,7 +3381,7 @@ select {
     right: -32px;
     width: 32px;
   }
-  
+
   .landing__flow-card::before {
     content: "→";
     position: absolute;
@@ -3358,7 +3393,7 @@ select {
     font-weight: 900;
     opacity: 0.4;
   }
-  
+
   .landing__flow-card:last-child::before {
     display: none;
   }
@@ -3394,27 +3429,27 @@ select {
 }
 
 .landing__story-avatar[data-avatar="jess"] {
-  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Jess&backgroundColor=ff6b9d');
+  background-image: url("https://api.dicebear.com/7.x/avataaars/svg?seed=Jess&backgroundColor=ff6b9d");
 }
 
 .landing__story-avatar[data-avatar="amir"] {
-  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Amir&backgroundColor=ffe156');
+  background-image: url("https://api.dicebear.com/7.x/avataaars/svg?seed=Amir&backgroundColor=ffe156");
 }
 
 .landing__story-avatar[data-avatar="maria"] {
-  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=4ecdc4');
+  background-image: url("https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=4ecdc4");
 }
 
 .landing__story-avatar[data-avatar="carlos"] {
-  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos&backgroundColor=ff9a56');
+  background-image: url("https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos&backgroundColor=ff9a56");
 }
 
 .landing__story-avatar[data-avatar="priya"] {
-  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Priya&backgroundColor=ff6b9d');
+  background-image: url("https://api.dicebear.com/7.x/avataaars/svg?seed=Priya&backgroundColor=ff6b9d");
 }
 
 .landing__story-avatar[data-avatar="jake"] {
-  background-image: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Jake&backgroundColor=4ecdc4');
+  background-image: url("https://api.dicebear.com/7.x/avataaars/svg?seed=Jake&backgroundColor=4ecdc4");
 }
 
 .landing__story-avatar::after {
