@@ -210,4 +210,3 @@ POSTED → ACCEPTED → IN_PROGRESS → COMPLETED
 
 - Backend serves uploaded files from `/uploads`.
 - On startup, backend runs lightweight DB initialization/migrations needed by current features.
-- Keep CORS restricted in production (it is permissive in local development).
