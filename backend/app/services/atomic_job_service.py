@@ -85,6 +85,10 @@ class AtomicJobService:
             # Update job status
             job.status = JobStatus.IN_PROGRESS
             
+            # Set start timestamp
+            from datetime import datetime, timezone
+            job.started_at = datetime.now(timezone.utc)
+            
             await self.db.commit()
             await self.db.refresh(job)
             
@@ -142,6 +146,10 @@ class AtomicJobService:
             
             # Update status
             job.status = JobStatus.COMPLETED
+            
+            # Set completion timestamp
+            from datetime import datetime, timezone
+            job.completed_at = datetime.now(timezone.utc)
 
             # Release escrow to genie as part of completion flow
             wallet_service = WalletService(self.db)

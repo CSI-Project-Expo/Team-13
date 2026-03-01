@@ -2,6 +2,7 @@ import StatusBadge from "./StatusBadge";
 import JobChat from "./JobChat";
 import ButtonSpinner from "./ButtonSpinner";
 import LiveLocationMap from "./LiveLocationMap";
+import Stopwatch from "./Stopwatch";
 import { useAuth } from "../hooks/useAuth";
 
 /**
@@ -46,6 +47,34 @@ export default function JobCard({
       </div>
 
       <p className="job-card__description">{job.description}</p>
+
+      {/* Stopwatch - shows for genie when job is in progress */}
+      {job.status === "IN_PROGRESS" && job.started_at && role === "genie" && (
+        <Stopwatch startTime={job.started_at} isRunning={true} />
+      )}
+
+      {/* Completed time display */}
+      {job.status === "COMPLETED" && job.started_at && job.completed_at && role === "genie" && (
+        <div className="stopwatch" style={{ background: "var(--neo-green)" }}>
+          <div className="stopwatch__display">
+            <span className="stopwatch__icon">✅</span>
+            <span className="stopwatch__time">
+              {(() => {
+                const start = new Date(job.started_at).getTime();
+                const end = new Date(job.completed_at).getTime();
+                const totalSeconds = Math.floor((end - start) / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                if (hours > 0) {
+                  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+                }
+                return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+              })()}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="job-card__footer">
         <div className="job-card__meta">

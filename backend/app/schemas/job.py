@@ -41,6 +41,8 @@ class JobResponse(JobBase):
     assigned_genie: Optional[UUID] = None
     status: str
     created_at: datetime
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
     user: Optional[UserProfile] = None
     genie: Optional[UserProfile] = None
     

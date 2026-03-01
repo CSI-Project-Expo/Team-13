@@ -30,6 +30,10 @@ class Job(Base):
 
     status = Column(String, default="POSTED", nullable=False)
     
+    # Timing fields
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    
     # Rating field from Genie to User
     genie_rating = Column(Integer, nullable=True)
     rating_comment = Column(String, nullable=True)
