@@ -3314,6 +3314,10 @@ select {
   box-shadow: 3px 3px 0 var(--border);
 }
 
+.landing__fab {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .scroll-to-top {
     bottom: 20px;
@@ -3321,6 +3325,37 @@ select {
     width: 44px;
     height: 44px;
     font-size: 20px;
+  }
+
+  .landing__fab {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 3px solid var(--border);
+    background: var(--neo-pink);
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 6px 6px 0 var(--border);
+    z-index: 98;
+    cursor: var(--hover-cursor);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .landing__fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 8px 8px 0 var(--border);
+  }
+
+  .landing__fab:active {
+    transform: translateY(0);
+    box-shadow: 4px 4px 0 var(--border);
   }
 }
 
