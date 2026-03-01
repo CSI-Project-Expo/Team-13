@@ -1,290 +1,213 @@
-# Do4U Backend API
+# Do4U (Team-13)
 
-A production-ready FastAPI backend for the Do4U service marketplace application, built with Supabase integration.
+Full-stack service marketplace project with a FastAPI backend and a React + Vite frontend.
 
 ## Tech Stack
 
-- **FastAPI** - Modern, fast web framework for building APIs
-- **Python 3.11+** - Programming language
-- **Supabase** - PostgreSQL database + Authentication
-- **SQLAlchemy** - Async ORM for database operations
-- **asyncpg** - Async PostgreSQL driver
-- **python-jose** - JWT verification
-- **Pydantic v2** - Data validation and serialization
-- **Uvicorn** - ASGI server
+### Backend
+- **FastAPI**: REST API framework and interactive docs (`/docs`)
+- **SQLAlchemy (Async) + asyncpg**: async ORM and PostgreSQL driver
+- **Supabase**: authentication (JWT) and managed PostgreSQL
+- **Pydantic v2**: request/response validation and settings management
+- **Uvicorn**: ASGI server for local development and deployment
+
+### Frontend
+- **React 19**: component-based UI
+- **Vite**: fast dev server and production build tooling
+- **React Router**: client-side routing and protected pages
+- **Supabase JS**: auth session handling in the browser
+- **Fetch API wrapper**: centralized API calls with token + 401 handling
 
 ## Features
 
-- ✅ Supabase JWT authentication
-- ✅ Role-based authorization (user, genie, admin)
-- ✅ Atomic job acceptance with database transactions
-- ✅ Job lifecycle validation
-- ✅ Wallet and escrow system
-- ✅ AI-powered pricing recommendations
-- ✅ Comprehensive error handling
-- ✅ Modular architecture
-- ✅ Production-ready configuration
+- Supabase authentication with JWT-based API authorization
+- Role-based flows for user, genie, and admin
+- Job lifecycle management: `POSTED → ACCEPTED → IN_PROGRESS → COMPLETED`
+- Atomic job acceptance/start/complete operations to reduce race conditions
+- Wallet + escrow transfers for job payment handling
+- AI-assisted job pricing estimates
+- Real-time in-job chat via WebSocket with REST message fallback
+- Live genie location updates during jobs
+- Notification center with mark-read and mark-all-read support
+- Genie verification workflow (apply, admin approve/reject)
+- Admin dashboards for users, jobs, complaints, and financial summary
+- File upload/serving support for genie verification documents
 
 ## Project Structure
 
 ```
-app/
-├── main.py                 # FastAPI application entry point
-├── database.py            # Database configuration and connection
-├── core/
-│   ├── config.py          # Pydantic settings and configuration
-│   ├── auth.py            # JWT verification and authentication
-│   └── roles.py           # Role-based authorization
-├── models/                # SQLAlchemy models
-│   ├── user.py
-│   ├── genie.py
-│   ├── job.py
-│   ├── offer.py
-│   ├── wallet.py
-│   ├── rating.py
-│   └── complaint.py
-├── schemas/               # Pydantic schemas for API
-│   ├── user.py
-│   ├── job.py
-│   ├── offer.py
-│   ├── wallet.py
-│   ├── rating.py
-│   └── complaint.py
-├── routes/                # API endpoints
-│   ├── jobs.py
-│   ├── offers.py
-│   ├── wallet.py
-│   └── admin.py
-├── services/              # Business logic
-│   ├── job_service.py
-│   ├── atomic_job_service.py
-│   ├── wallet_service.py
-│   └── ai_pricing.py
-└── utils/
-    ├── exceptions.py      # Custom exceptions
-    └── __init__.py
+Team-13/
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── core/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   └── utils/
+│   ├── requirements.txt
+│   ├── create_tables.py
+│   └── test_login.py
+└── frontend/
+    ├── src/
+    ├── package.json
+    └── vite.config.js
 ```
 
-## Database Schema
+## Prerequisites
 
-The application uses the following tables (already created in Supabase):
+- Python 3.11+
+- Node.js 18+
+- npm
+- Supabase project (URL + anon key + service key)
+- PostgreSQL connection string for Supabase database
 
-- **users** - User accounts with roles
-- **genies** - Genie profiles and skills
-- **jobs** - Service marketplace jobs
-- **offers** - Job offers from genies
-- **wallet** - User wallet balances
-- **ratings** - Job ratings and reviews
-- **complaints** - User complaints
+## Environment Variables
 
-## Setup Instructions
+Create two environment files:
 
-### 1. Prerequisites
-
-- Python 3.11 or higher
-- Supabase project with database tables created
-- Supabase JWT public key and service role key
-
-### 2. Environment Variables
-
-Create a `.env` file in the project root:
+### 1) `backend/.env`
 
 ```env
 # Database
-DATABASE_URL=postgresql+asyncpg://[user]:[password]@[host]:[port]/[database]
+DATABASE_URL=postgresql+asyncpg://<user>:<password>@<host>:<port>/<database>
 
-# Supabase Configuration
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_JWT_PUBLIC_KEY=your-jwt-public-key
-SUPABASE_SERVICE_KEY=your-supabase-service-key
+# Supabase
+SUPABASE_URL=https://<your-project>.supabase.co
+SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_SERVICE_KEY=<your-service-role-key>
 
-# Application
+# App
 DEBUG=false
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=<optional-secret>
+
+# Optional local test credentials
+TEST_EMAIL=<optional>
+TEST_PASSWORD=<optional>
 ```
 
-### 3. Installation
+### 2) `frontend/.env`
+
+```env
+VITE_BACKEND_URL=http://localhost:8000
+VITE_SUPABASE_URL=https://<your-project>.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+```
+
+## Setup & Run
+
+### Backend
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd Team-13
+cd backend
 
-# Create virtual environment
+# create venv (Windows)
 python -m venv venv
-
-# Activate virtual environment
-# Windows
 venv\Scripts\activate
-# macOS/Linux
-source venv/bin/activate
 
-# Install dependencies
 pip install -r requirements.txt
+
+# run API
+uvicorn app.main:app --reload
 ```
 
-### 4. Running the Application
+Backend docs and health:
+- Swagger: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Health: http://localhost:8000/health
+
+### Frontend
 
 ```bash
-# Development mode
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Production mode
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+cd frontend
+npm install
+npm run dev
 ```
 
-### 5. API Documentation
+Frontend runs on Vite default port (typically http://localhost:5173).
 
-Once running, visit:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+## Authentication
 
-## API Endpoints
+- Backend validates Supabase JWTs using Supabase JWKS.
+- Most REST endpoints require `Authorization: Bearer <token>`.
+- Frontend stores Supabase access token and attaches it to API calls.
 
-### Authentication
-All endpoints (except health checks) require Supabase JWT authentication via the `Authorization: Bearer <token>` header.
+## API Overview (current)
 
-### Jobs API
-- `POST /api/v1/jobs` - Create a new job (user only)
-- `GET /api/v1/jobs/available` - Get available jobs (genie only)
-- `GET /api/v1/jobs/my-jobs` - Get user's jobs
-- `GET /api/v1/jobs/{job_id}` - Get job details
-- `PUT /api/v1/jobs/{job_id}` - Update job (owner only)
-- `DELETE /api/v1/jobs/{job_id}` - Delete job (owner only)
-- `POST /api/v1/jobs/{job_id}/accept` - Accept a job (genie only)
-- `POST /api/v1/jobs/{job_id}/start` - Start a job (genie only)
-- `POST /api/v1/jobs/{job_id}/complete` - Complete a job (genie only)
-- `GET /api/v1/jobs/{job_id}/price-estimate` - Get AI price estimate
+Base URL: `http://localhost:8000`
 
-### Offers API
-- `POST /api/v1/offers` - Create an offer (genie only)
-- `GET /api/v1/offers/job/{job_id}` - Get job offers (owner only)
-- `GET /api/v1/offers/my-offers` - Get my offers (genie only)
-- `PUT /api/v1/offers/{offer_id}` - Update offer (genie only)
-- `DELETE /api/v1/offers/{offer_id}` - Delete offer (genie only)
+### Users (`/api/v1/users`)
+- `GET /me`
+- `PATCH /me`
+- `POST /verification/apply`
 
-### Wallet API
-- `GET /api/v1/wallet` - Get wallet information
-- `POST /api/v1/wallet/add-funds` - Add funds to wallet
-- `POST /api/v1/wallet/withdraw` - Withdraw funds
-- `POST /api/v1/wallet/transfer-to-escrow` - Transfer to escrow
-- `POST /api/v1/wallet/release-from-escrow` - Release from escrow
-- `GET /api/v1/wallet/balance` - Get simple balance info
+### Jobs (`/api/v1/jobs`)
+- `POST /`
+- `GET /available`
+- `GET /my-jobs`
+- `GET /{job_id}`
+- `PUT /{job_id}`
+- `DELETE /{job_id}`
+- `PATCH /{job_id}/accept`
+- `POST /{job_id}/start`
+- `POST /{job_id}/complete`
+- `POST /{job_id}/cancel-assignment`
+- `GET /{job_id}/price-estimate`
+- `POST /price-estimate`
+- `POST /{job_id}/rate-user`
 
-### Admin API
-- `GET /api/v1/admin/dashboard` - Admin dashboard
-- `GET /api/v1/admin/users` - Get all users
-- `PUT /api/v1/admin/users/{user_id}/role` - Update user role
-- `GET /api/v1/admin/jobs` - Get all jobs
-- `GET /api/v1/admin/complaints` - Get all complaints
-- `PUT /api/v1/admin/complaints/{complaint_id}/resolve` - Resolve complaint
-- `GET /api/v1/admin/financial-summary` - Financial summary
+### Location (`/api/v1/jobs`)
+- `POST /{job_id}/location`
+- `GET /{job_id}/location`
+
+### Offers (`/api/v1/offers`)
+- `POST /`
+- `GET /job/{job_id}`
+- `GET /my-offers`
+- `PUT /{offer_id}`
+- `DELETE /{offer_id}`
+
+### Wallet (`/api/v1/wallet`)
+- `GET /`
+- `POST /add-funds`
+- `POST /withdraw`
+- `POST /transfer-to-escrow`
+- `POST /release-from-escrow`
+- `GET /balance`
+
+### Notifications (`/api/v1/notifications`)
+- `GET /`
+- `PATCH /{notification_id}/read`
+- `PATCH /read-all`
+
+### Admin (`/api/v1/admin`)
+- `GET /verifications/pending`
+- `POST /verifications/{genie_user_id}/approve`
+- `POST /verifications/{genie_user_id}/reject`
+- `GET /dashboard`
+- `GET /users`
+- `GET /users/{user_id}`
+- `PUT /users/{user_id}/role`
+- `GET /jobs`
+- `GET /complaints`
+- `PUT /complaints/{complaint_id}/resolve`
+- `GET /financial-summary`
+
+### Chat
+- WebSocket: `ws://localhost:8000/api/v1/chat/ws/{job_id}?token=<jwt>`
+- REST fallback: `GET /api/v1/chat/{job_id}/messages`
 
 ## Job Lifecycle
 
-Jobs follow this strict lifecycle:
+The core job status flow is:
+
 ```
 POSTED → ACCEPTED → IN_PROGRESS → COMPLETED
 ```
 
-- **POSTED**: Job is available for genies to accept
-- **ACCEPTED**: Genie has accepted the job
-- **IN_PROGRESS**: Genie is working on the job
-- **COMPLETED**: Job is finished and ready for payment
+## Notes
 
-## Atomic Operations
-
-Critical operations like job acceptance use database transactions with row locking to prevent race conditions:
-
-```python
-# Atomic job acceptance prevents multiple genies from accepting the same job
-async def accept_job_atomically(job_id: UUID, genie_id: UUID) -> Job:
-    async with self.db.begin():
-        # Lock job row for update
-        job = await self.db.execute(
-            select(Job).options(with_for_update()).where(Job.id == job_id)
-        )
-        # Validate and update atomically
-```
-
-## AI Pricing Service
-
-The application includes an AI-powered pricing service that provides intelligent price estimates based on:
-
-- Job category detection
-- Duration analysis
-- Complexity factors
-- Location-based pricing
-- Market insights
-
-## Error Handling
-
-The application uses custom exceptions for better error handling:
-
-```python
-# Custom exceptions with proper HTTP status codes
-class JobNotFoundError(NotFoundError):
-    def __init__(self, message: str = "Job not found"):
-        super().__init__(message)
-
-class InvalidJobTransitionError(ValidationError):
-    def __init__(self, message: str = "Invalid job status transition"):
-        super().__init__(message)
-```
-
-## Development
-
-### Code Formatting
-
-```bash
-# Format code
-black app/
-isort app/
-
-# Type checking
-mypy app/
-
-# Linting
-flake8 app/
-```
-
-### Testing
-
-```bash
-# Run tests
-pytest
-
-# Run with coverage
-pytest --cov=app
-```
-
-## Production Deployment
-
-### Environment Setup
-1. Set all required environment variables
-2. Configure proper CORS origins
-3. Set up proper logging
-4. Configure database connection pooling
-
-### Security Considerations
-- Never expose secrets in code
-- Use HTTPS in production
-- Configure proper CORS policies
-- Implement rate limiting
-- Set up monitoring and alerting
-
-## Contributing
-
-1. Follow the existing code style
-2. Add tests for new features
-3. Update documentation
-4. Use meaningful commit messages
-5. Create pull requests for review
-
-## License
-
-This project is licensed under the MIT License.
-
-## Support
-
-For support and questions, please contact the development team.
+- Backend serves uploaded files from `/uploads`.
+- On startup, backend runs lightweight DB initialization/migrations needed by current features.
+- Keep CORS restricted in production (it is permissive in local development).
