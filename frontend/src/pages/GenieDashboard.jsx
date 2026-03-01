@@ -285,16 +285,19 @@ export default function GenieDashboard() {
                 <SkeletonCard key={i} />
               ))
             ) : jobs.length > 0 ? (
-              jobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onAction={getAction(job).handler}
-                  actionLabel={getAction(job).label}
-                  loading={actionId === job.id}
-                  currentUserId={user?.id}
-                />
-              ))
+              jobs.map((job) => {
+                const action = getAction(job);
+                return (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onAction={action?.handler}
+                    actionLabel={action?.label}
+                    loading={actionId === job.id}
+                    currentUserId={user?.id}
+                  />
+                );
+              })
             ) : (
               <EmptyState
                 icon={tab === "available" ? "🔍" : "📋"}

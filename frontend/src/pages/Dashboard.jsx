@@ -132,17 +132,20 @@ export default function Dashboard() {
           </div>
         ) : jobs.length > 0 ? (
           <div className="job-grid">
-            {jobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                userType="user"
-                onAction={getAction(job).handler}
-                actionLabel={getAction(job).label}
-                loading={actionId === job.id}
-                currentUserId={user?.id}
-              />
-            ))}
+            {jobs.map((job) => {
+              const action = getAction(job);
+              return (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  userType="user"
+                  onAction={action?.handler}
+                  actionLabel={action?.label}
+                  loading={actionId === job.id}
+                  currentUserId={user?.id}
+                />
+              );
+            })}
           </div>
         ) : (
           <EmptyState
