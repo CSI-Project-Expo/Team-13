@@ -26,7 +26,7 @@ engine = create_async_engine(
     pool_recycle=300,
     connect_args={
         "timeout": 30,
-        "prepared_statement_cache_size": 0,  # Required for Supabase Supavisor
+        "statement_cache_size": 0,  # Required for Supabase Supavisor
     },
 )
 
