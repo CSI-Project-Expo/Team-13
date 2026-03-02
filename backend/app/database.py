@@ -7,11 +7,27 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Create async engine
+# Fix Supabase pooler URL: use transaction mode (port 6543) for better
+# compatibility with serverless/short-lived connections, and disable
+# prepared statement cache which Supavisor doesn't support.
+db_url = settings.DATABASE_URL
+if "pooler.supabase.com:5432" in db_url:
+    db_url = db_url.replace("pooler.supabase.com:5432", "pooler.supabase.com:6543")
+
+# Create async engine with timeout-resilient settings
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    db_url,
     echo=settings.DEBUG,
     future=True,
+    pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=300,
+    connect_args={
+        "timeout": 30,
+        "prepared_statement_cache_size": 0,  # Required for Supabase Supavisor
+    },
 )
 
 # Create async session factory
