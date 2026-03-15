@@ -19,6 +19,13 @@ async def lifespan(app: FastAPI):
     yield
 
 
+ALLOWED_ORIGINS = [
+    "https://do4u.vercel.app",
+    "https://do4u-git-main-stormbreaker08s-projects.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+]
+
 app = FastAPI(
     title="Do4U Backend",
     description="Backend API for Do4U service marketplace",
@@ -33,16 +40,31 @@ app.mount("/uploads", StaticFiles(directory=str(uploads_root)), name="uploads")
 # Setup CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://do4u.vercel.app",
-        "https://do4u-git-main-stormbreaker08s-projects.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _cors_headers(request: Request) -> dict:
+    """
+    Return CORS headers for error responses.
+
+    FastAPI exception handlers run *outside* the CORSMiddleware stack, so
+    error responses (4xx / 5xx) are returned without the
+    Access-Control-Allow-Origin header, which causes browsers to report a
+    CORS error instead of the real error. We fix this by manually adding the
+    header when the request origin is in our allow-list.
+    """
+    origin = request.headers.get("origin", "")
+    if origin in ALLOWED_ORIGINS:
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+        }
+    return {}
+
 
 # Setup exception handlers
 @app.exception_handler(BaseAPIException)
@@ -50,6 +72,7 @@ async def api_exception_handler(request: Request, exc: BaseAPIException):
     """Handle custom API exceptions"""
     return JSONResponse(
         status_code=exc.status_code,
+        headers=_cors_headers(request),
         content={
             "error": True,
             "message": exc.message,
@@ -63,6 +86,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     """Handle HTTP exceptions"""
     return JSONResponse(
         status_code=exc.status_code,
+        headers=_cors_headers(request),
         content={
             "error": True,
             "message": exc.detail,
@@ -76,6 +100,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """Handle request validation errors with actionable details"""
     return JSONResponse(
         status_code=422,
+        headers=_cors_headers(request),
         content={
             "error": True,
             "message": "Request validation failed",
@@ -91,6 +116,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     logging.error(f"Unexpected error: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
+        headers=_cors_headers(request),
         content={
             "error": True,
             "message": "Internal server error",
@@ -117,3 +143,4 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+

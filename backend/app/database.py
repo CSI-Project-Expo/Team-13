@@ -7,14 +7,21 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Fix Supabase pooler URL: use transaction mode (port 6543) for better
-# compatibility with serverless/short-lived connections, and disable
-# prepared statement cache which Supavisor doesn't support.
+# ─── Database URL ────────────────────────────────────────────────────────────
+# Supabase exposes two pooler ports:
+#   :5432 — session pooler   (Supavisor session mode)  — supports prepared stmts
+#   :6543 — transaction pooler (Supavisor transaction mode) — does NOT support
+#           asyncpg prepared statements → causes DuplicatePreparedStatementError
+#
+# We MUST stay on port 5432. Switching to 6543 causes 500s on every DB call
+# because pool_pre_ping fires `select pg_catalog.version()` as a prepared
+# statement which PgBouncer in transaction mode cannot handle.
 db_url = settings.DATABASE_URL
-if "pooler.supabase.com:5432" in db_url:
-    db_url = db_url.replace("pooler.supabase.com:5432", "pooler.supabase.com:6543")
+# Safety: if someone set 6543 explicitly, revert to 5432
+if "pooler.supabase.com:6543" in db_url:
+    db_url = db_url.replace("pooler.supabase.com:6543", "pooler.supabase.com:5432")
 
-# Create async engine with timeout-resilient settings
+# Create async engine
 engine = create_async_engine(
     db_url,
     echo=settings.DEBUG,
@@ -26,7 +33,7 @@ engine = create_async_engine(
     pool_recycle=300,
     connect_args={
         "timeout": 30,
-        "statement_cache_size": 0,  # Required for Supabase Supavisor
+        "statement_cache_size": 0,  # Disable asyncpg prepared-statement cache
     },
 )
 

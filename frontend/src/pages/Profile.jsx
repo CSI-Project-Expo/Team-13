@@ -389,10 +389,9 @@ export default function Profile() {
                                     style={{
                                         display:'flex', alignItems:'center', justifyContent:'space-between',
                                         width:'100%', padding:'14px 0',
-                                        borderBottom:'2.5px solid var(--border)',
                                         background:'none', border:'none',
                                         borderBottom:'2.5px solid var(--border)',
-                                        textAlign:'left', color:'var(--text)',
+                                        textAlign:'left', color:'var(--text)', cursor:'pointer',
                                     }}
                                 >
                                     <div>

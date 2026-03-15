@@ -73,7 +73,7 @@ export default function GenieDashboard() {
       // Use PATCH method for job acceptance with wallet validation
       const result = await api.patch(`/api/v1/jobs/${job.id}/accept`, {});
       showToast(
-        `Job accepted! ₹${result.escrow_amount} moved to escrow. User wallet balance: ₹${result.user_wallet_balance}`,
+        `Job accepted! ₹${result.escrow_amount} moved to escrow.`,
       );
       loadJobs();
     } catch (err) {
@@ -96,7 +96,16 @@ export default function GenieDashboard() {
     setActionId(job.id);
     try {
       await api.post(`/api/v1/jobs/${job.id}/start`, {});
-      showToast(`Job started! Good luck <img src='${logo}' alt='Do4U' style={{width: '16px', height: '16px', verticalAlign: 'middle', marginLeft: '4px'}} />`);
+      showToast(
+  <>
+    Job started! Good luck
+    <img
+      src={logo}
+      alt="Do4U"
+      style={{ width: '16px', height: '16px', verticalAlign: 'middle', marginLeft: '4px' }}
+    />
+  </>
+);
       loadJobs();
     } catch (err) {
       showToast(`Error: ${err.message}`);

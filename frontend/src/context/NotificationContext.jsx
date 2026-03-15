@@ -1,11 +1,16 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
+import { AuthContext } from './AuthContext';
 
 const NotificationContext = createContext(null);
 
 const STORAGE_KEY = 'genie_notifications_read';
 
 export function NotificationProvider({ children }) {
+    // Read token directly from AuthContext so we only poll when authenticated
+    const auth = useContext(AuthContext);
+    const token = auth?.token ?? localStorage.getItem('access_token');
+
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -110,13 +115,20 @@ export function NotificationProvider({ children }) {
         setIsOpen(false);
     }, []);
 
-    // Poll for new notifications every 30 seconds
+    // Poll for new notifications every 30 seconds — only while authenticated
     useEffect(() => {
+        if (!token) {
+            // User is logged out — wipe any stale notification state
+            setNotifications([]);
+            setUnreadCount(0);
+            return;
+        }
+
         fetchNotifications();
-        
+
         const interval = setInterval(fetchNotifications, 30000);
         return () => clearInterval(interval);
-    }, [fetchNotifications]);
+    }, [token, fetchNotifications]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
