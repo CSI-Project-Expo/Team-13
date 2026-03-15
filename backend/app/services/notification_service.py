@@ -59,8 +59,7 @@ class NotificationService:
         """Mark a notification as read"""
         result = await self.db.execute(
             select(Notification).where(
-                Notification.id == notification_id,
-                Notification.user_id == user_id
+                (Notification.id == notification_id) & (Notification.user_id == user_id)
             )
         )
         notification = result.scalar_one_or_none()
@@ -92,8 +91,7 @@ class NotificationService:
         """Get count of unread notifications for a user"""
         result = await self.db.execute(
             select(Notification).where(
-                Notification.user_id == user_id,
-                Notification.is_read == False
+                (Notification.user_id == user_id) & (Notification.is_read == False)
             )
         )
         return len(result.scalars().all())
