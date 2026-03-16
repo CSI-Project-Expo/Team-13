@@ -117,34 +117,59 @@ def verify_token(token: str) -> dict:
     from jose import jwt
     
     try:
-        # Get JWKS
+        # Get JWKS from Supabase
         resp = httpx.get(SUPABASE_JWKS_URL, timeout=10.0)
-        jwks = resp.json()
-        headers = jwt.get_unverified_header(token)
-        kid = headers["kid"]
+        if resp.status_code != 200:
+            logger.error(f"Failed to fetch JWKS: HTTP {resp.status_code}")
+            raise ValueError(f"Failed to fetch JWKS")
         
+        jwks_data = resp.json()
+        
+        # Get unverified header to find the kid
+        try:
+            headers = jwt.get_unverified_header(token)
+            kid = headers.get("kid")
+        except Exception as header_error:
+            logger.error(f"Failed to get token header: {header_error}")
+            raise ValueError("Invalid token format")
+        
+        if not kid:
+            logger.error("Token header missing 'kid'")
+            raise ValueError("Token missing key ID")
+        
+        # Find matching key from JWKS
         public_key = None
-        for key in jwks["keys"]:
-            if key["kid"] == kid:
+        for key in jwks_data.get("keys", []):
+            if key.get("kid") == kid:
                 public_key = key
                 break
         
         if not public_key:
-            raise ValueError("Public key not found")
+            logger.error(f"Key ID {kid} not found in JWKS")
+            raise ValueError("Key not found")
         
-        # Decode JWT
-        payload = jwt.decode(
-            token,
-            public_key,
-            algorithms=["ES256"],
-            audience="authenticated",
-            issuer=f"https://{settings.SUPABASE_URL.replace('https://', '').split('/')[0]}/auth/v1"
-        )
-        
-        return payload
+        # Verify and decode token
+        issuer = f"https://{settings.SUPABASE_URL.replace('https://', '').split('/')[0]}/auth/v1"
+        try:
+            payload = jwt.decode(
+                token,
+                public_key,
+                algorithms=["RS256", "ES256"],
+                audience="authenticated",
+                issuer=issuer,
+                options={"verify_signature": True}
+            )
+            logger.info(f"Token verified successfully for user {payload.get('sub')}")
+            return payload
+        except JWTError as jwt_error:
+            logger.error(f"JWT verification failed: {jwt_error}")
+            raise ValueError("Invalid token")
+    
+    except ValueError:
+        raise
     except Exception as e:
-        logger.error(f"Token verification failed: {e}")
-        raise ValueError("Invalid token")
+        logger.error(f"Token verification error: {type(e).__name__}: {e}")
+        raise ValueError("Token verification failed")
 
 
 # For REST endpoints that need current user

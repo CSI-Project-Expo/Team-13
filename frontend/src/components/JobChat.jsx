@@ -6,6 +6,7 @@ export default function JobChat({
   currentUserId,
   jobOwnerId,
   assignedGenieId,
+  isFloating = false, // New prop to indicate floating mode
 }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -36,11 +37,27 @@ export default function JobChat({
   }, [messages]);
 
   useEffect(() => {
-    if (!canChat || !isChatOpen) return;
+    // In floating mode, connect immediately. In inline mode, only connect if chat is open
+    const shouldConnect = isFloating ? canChat : canChat && isChatOpen;
+
+    if (!shouldConnect) {
+      // Cleanup if we shouldn't be connected
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      return;
+    }
 
     const token = localStorage.getItem("access_token");
     if (!token) {
       console.error("No token found in localStorage");
+      return;
+    }
+
+    // Don't create a new connection if one already exists
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      console.log("WebSocket already connected, reusing existing connection");
       return;
     }
 
@@ -59,9 +76,21 @@ export default function JobChat({
       console.log("WebSocket message received:", data);
 
       if (data.type === "history") {
-        setMessages(data.messages);
+        // Replace entire history, deduplicating by message ID
+        const uniqueMessages = Array.from(
+          new Map(data.messages.map((msg) => [msg.id, msg])).values(),
+        );
+        setMessages(uniqueMessages);
       } else if (data.type === "new_message") {
-        setMessages((prev) => [...prev, data.message]);
+        // Only add message if it doesn't already exist (prevents duplicates)
+        setMessages((prev) => {
+          const messageExists = prev.some((m) => m.id === data.message.id);
+          if (messageExists) {
+            console.log("Duplicate message ignored:", data.message.id);
+            return prev;
+          }
+          return [...prev, data.message];
+        });
       }
     };
 
@@ -79,16 +108,22 @@ export default function JobChat({
         event.reason,
       );
       setIsConnected(false);
+      // Clear the ref when connection closes
+      if (wsRef.current === ws) {
+        wsRef.current = null;
+      }
     };
 
     wsRef.current = ws;
 
     return () => {
-      if (ws.readyState === WebSocket.OPEN) {
+      // Only close if this is the currently active connection
+      if (wsRef.current === ws && ws.readyState === WebSocket.OPEN) {
+        console.log("Closing WebSocket connection");
         ws.close();
       }
     };
-  }, [jobId, canChat, isChatOpen]);
+  }, [jobId, canChat, isChatOpen, isFloating]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -109,6 +144,80 @@ export default function JobChat({
     return null;
   }
 
+  // Floating mode: render just the chat content (without toggle button)
+  if (isFloating) {
+    return (
+      <div className="job-chat__floating-content">
+        <div className="job-chat__messages">
+          {messages.length === 0 ? (
+            <div className="job-chat__empty">
+              <p>
+                {isJobOwner
+                  ? "Waiting for the Genie to start the conversation..."
+                  : "No messages yet. Start a conversation!"}
+              </p>
+              <p style={{ fontSize: "11px", marginTop: "8px", opacity: 0.7 }}>
+                Messages will be saved. The other person can reply anytime.
+              </p>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`job-chat__message ${
+                  msg.sender_id === currentUserId
+                    ? "job-chat__message--own"
+                    : "job-chat__message--other"
+                }`}
+              >
+                <div className="job-chat__message-header">
+                  <span className="job-chat__sender">{msg.sender_name}</span>
+                  <span className="job-chat__time">
+                    {new Date(msg.created_at).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <div className="job-chat__message-content">{msg.content}</div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <form className="job-chat__form" onSubmit={sendMessage}>
+          <input
+            type="text"
+            className="job-chat__input"
+            placeholder={
+              !canSendMessage
+                ? "Waiting for Genie to start the conversation..."
+                : "Type a message..."
+            }
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            disabled={!isConnected || !canSendMessage}
+          />
+          <button
+            type="submit"
+            className="btn btn--primary btn--sm"
+            disabled={!isConnected || !newMessage.trim() || !canSendMessage}
+          >
+            Send
+          </button>
+        </form>
+
+        <div className="job-chat__status-indicator">
+          <span className="job-chat__status job-chat__status--info">
+            {isConnected ? "● Connected" : "○ Connecting..."}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Inline mode: render with toggle button (original behavior)
   return (
     <div className="job-chat">
       <button

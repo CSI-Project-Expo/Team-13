@@ -60,7 +60,8 @@ async def websocket_endpoint(
         # Get token from query params
         token = websocket.query_params.get("token")
         if not token:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            print("ERROR: No token provided")
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="No token")
             return
         
         # Verify user from token
@@ -68,115 +69,142 @@ async def websocket_endpoint(
             from app.core.auth import verify_token
             payload = verify_token(token)
             user_id = UUID(payload.get("sub"))
-        except:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            print(f"WebSocket: User {user_id} authenticated successfully")
+        except Exception as auth_error:
+            print(f"WebSocket auth error: {auth_error}")
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Auth failed")
             return
         
         # Verify job exists and user is involved
-        result = await db.execute(
-            select(Job).where(Job.id == UUID(job_id))
-        )
-        job = result.scalar_one_or_none()
+        try:
+            result = await db.execute(
+                select(Job).where(Job.id == UUID(job_id))
+            )
+            job = result.scalar_one_or_none()
+        except Exception as db_error:
+            print(f"WebSocket job lookup error: {db_error}")
+            await websocket.close(code=status.WS_1011_SERVER_ERROR, reason="DB error")
+            return
         
         if not job:
-            await websocket.close(code=status.WS_1003_UNSUPPORTED_DATA)
+            print(f"WebSocket: Job {job_id} not found")
+            await websocket.close(code=status.WS_1003_UNSUPPORTED_DATA, reason="Job not found")
             return
         
         # Check if user is part of this job (either creator or assigned genie)
         if job.user_id != user_id and job.assigned_genie != user_id:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            print(f"WebSocket: User {user_id} not authorized for job {job_id}")
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Not authorized")
             return
         
         # Check if job is in a state that allows chatting
         if job.status not in ["ACCEPTED", "IN_PROGRESS", "POSTED"]:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            print(f"WebSocket: Job {job_id} has status {job.status}, chat not allowed")
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Job status not allowed")
             return
         
         await manager.connect(websocket, job_id)
+        print(f"WebSocket: Connected for job {job_id}, user {user_id}")
         
         # Send chat history
-        messages_result = await db.execute(
-            select(Message, User.name)
-            .join(User, Message.sender_id == User.id)
-            .where(Message.job_id == UUID(job_id))
-            .order_by(Message.created_at.asc())
-        )
-        
-        history = []
-        for msg, sender_name in messages_result.all():
-            history.append({
-                "id": str(msg.id),
-                "sender_id": str(msg.sender_id),
-                "sender_name": sender_name,
-                "content": msg.content,
-                "created_at": msg.created_at.isoformat(),
-                "is_read": msg.is_read
+        try:
+            messages_result = await db.execute(
+                select(Message, User.name)
+                .join(User, Message.sender_id == User.id)
+                .where(Message.job_id == UUID(job_id))
+                .order_by(Message.created_at.asc())
+            )
+            
+            history = []
+            for msg, sender_name in messages_result.all():
+                history.append({
+                    "id": str(msg.id),
+                    "sender_id": str(msg.sender_id),
+                    "sender_name": sender_name,
+                    "content": msg.content,
+                    "created_at": msg.created_at.isoformat(),
+                    "is_read": msg.is_read
+                })
+            
+            await websocket.send_json({
+                "type": "history",
+                "messages": history
             })
-        
-        await websocket.send_json({
-            "type": "history",
-            "messages": history
-        })
+            print(f"WebSocket: Sent {len(history)} messages to user {user_id}")
+        except Exception as history_error:
+            print(f"WebSocket error sending history: {history_error}")
+            await websocket.close(code=status.WS_1011_SERVER_ERROR, reason="Failed to load history")
+            return
         
         # Listen for messages
         while True:
-            data = await websocket.receive_json()
-            
-            if data.get("type") == "message":
-                content = data.get("content", "").strip()
-                if not content:
-                    continue
+            try:
+                data = await websocket.receive_json()
                 
-                # Save message to database
-                new_message = Message(
-                    job_id=UUID(job_id),
-                    sender_id=user_id,
-                    content=content,
-                    is_read=False
-                )
-                db.add(new_message)
-                await db.commit()
-                await db.refresh(new_message)
-                
-                # Get sender name
-                sender_result = await db.execute(
-                    select(User.name).where(User.id == user_id)
-                )
-                sender_name = sender_result.scalar_one()
-                
-                # Broadcast to all connections in this job
-                message_data = {
-                    "type": "new_message",
-                    "message": {
-                        "id": str(new_message.id),
-                        "sender_id": str(new_message.sender_id),
-                        "sender_name": sender_name,
-                        "content": new_message.content,
-                        "created_at": new_message.created_at.isoformat(),
-                        "is_read": new_message.is_read
-                    }
-                }
-                
-                await manager.broadcast(message_data, job_id)
-                
-            elif data.get("type") == "mark_read":
-                # Mark messages as read
-                await db.execute(
-                    Message.__table__.update()
-                    .where(
-                        and_(
-                            Message.job_id == UUID(job_id),
-                            Message.sender_id != user_id
-                        )
+                if data.get("type") == "message":
+                    content = data.get("content", "").strip()
+                    if not content:
+                        continue
+                    
+                    # Save message to database
+                    new_message = Message(
+                        job_id=UUID(job_id),
+                        sender_id=user_id,
+                        content=content,
+                        is_read=False
                     )
-                    .values(is_read=True)
-                )
-                await db.commit()
+                    db.add(new_message)
+                    await db.commit()
+                    await db.refresh(new_message)
+                    
+                    # Get sender name
+                    sender_result = await db.execute(
+                        select(User.name).where(User.id == user_id)
+                    )
+                    sender_name = sender_result.scalar_one()
+                    
+                    # Broadcast to all connections in this job
+                    message_data = {
+                        "type": "new_message",
+                        "message": {
+                            "id": str(new_message.id),
+                            "sender_id": str(new_message.sender_id),
+                            "sender_name": sender_name,
+                            "content": new_message.content,
+                            "created_at": new_message.created_at.isoformat(),
+                            "is_read": new_message.is_read
+                        }
+                    }
+                    
+                    await manager.broadcast(message_data, job_id)
+                    
+                elif data.get("type") == "mark_read":
+                    # Mark messages as read
+                    await db.execute(
+                        Message.__table__.update()
+                        .where(
+                            and_(
+                                Message.job_id == UUID(job_id),
+                                Message.sender_id != user_id
+                            )
+                        )
+                        .values(is_read=True)
+                    )
+                    await db.commit()
+            except json.JSONDecodeError:
+                print(f"WebSocket: Invalid JSON from user {user_id}")
+                continue
+            except Exception as msg_error:
+                print(f"WebSocket message error: {msg_error}")
+                break
     
     except WebSocketDisconnect:
+        print(f"WebSocket: User {user_id} disconnected from job {job_id}")
         manager.disconnect(websocket, job_id)
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        print(f"WebSocket error for user {user_id} on job {job_id}: {e}")
+        import traceback
+        traceback.print_exc()
         manager.disconnect(websocket, job_id)
 
 

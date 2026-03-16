@@ -1,7 +1,10 @@
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import StatusBadge from "./StatusBadge";
 import JobChat from "./JobChat";
 import ButtonSpinner from "./ButtonSpinner";
 import LiveLocationMap from "./LiveLocationMap";
+import FloatingPanel from "./FloatingPanel";
 import Stopwatch from "./Stopwatch";
 import { useAuth } from "../hooks/useAuth";
 
@@ -21,6 +24,8 @@ export default function JobCard({
   currentUserId,
 }) {
   const { role } = useAuth();
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const [showMapPanel, setShowMapPanel] = useState(false);
   const price =
     job.price != null ? `₹${Number(job.price).toFixed(2)}` : "Negotiable";
   const date = job.created_at
@@ -54,27 +59,30 @@ export default function JobCard({
       )}
 
       {/* Completed time display */}
-      {job.status === "COMPLETED" && job.started_at && job.completed_at && role === "genie" && (
-        <div className="stopwatch" style={{ background: "var(--neo-green)" }}>
-          <div className="stopwatch__display">
-            <span className="stopwatch__icon">✅</span>
-            <span className="stopwatch__time">
-              {(() => {
-                const start = new Date(job.started_at).getTime();
-                const end = new Date(job.completed_at).getTime();
-                const totalSeconds = Math.floor((end - start) / 1000);
-                const hours = Math.floor(totalSeconds / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = totalSeconds % 60;
-                if (hours > 0) {
-                  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-                }
-                return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-              })()}
-            </span>
+      {job.status === "COMPLETED" &&
+        job.started_at &&
+        job.completed_at &&
+        role === "genie" && (
+          <div className="stopwatch" style={{ background: "var(--neo-green)" }}>
+            <div className="stopwatch__display">
+              <span className="stopwatch__icon">✅</span>
+              <span className="stopwatch__time">
+                {(() => {
+                  const start = new Date(job.started_at).getTime();
+                  const end = new Date(job.completed_at).getTime();
+                  const totalSeconds = Math.floor((end - start) / 1000);
+                  const hours = Math.floor(totalSeconds / 3600);
+                  const minutes = Math.floor((totalSeconds % 3600) / 60);
+                  const seconds = totalSeconds % 60;
+                  if (hours > 0) {
+                    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+                  }
+                  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+                })()}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <div className="job-card__footer">
         <div className="job-card__meta">
@@ -103,27 +111,73 @@ export default function JobCard({
         )}
       </div>
 
-      {/* Live Location Map - shows for active jobs when genie is assigned */}
-      {showLiveLocation && currentUserId && (
-        <LiveLocationMap 
-          jobId={job.id} 
-          role={role} 
-          jobStatus={job.status}
-        />
+      {/* Floating action buttons for map and chat */}
+      <div className="job-card__floating-actions">
+        {/* Map button - shows for active jobs when genie is assigned */}
+        {showLiveLocation && currentUserId && (
+          <button
+            className="btn btn--sm btn--ghost"
+            onClick={() => setShowMapPanel(true)}
+            title="View job location"
+          >
+            🗺️ Location
+          </button>
+        )}
+
+        {/* Chat button - shows for job owner or assigned genie */}
+        {currentUserId &&
+          (job.user_id === currentUserId ||
+            job.assigned_genie === currentUserId) && (
+            <button
+              className="btn btn--sm btn--ghost"
+              onClick={() => setShowChatPanel(true)}
+              title="Open job chat"
+            >
+              💬 Chat
+            </button>
+          )}
+      </div>
+
+      {/* Floating Chat Panel - rendered via portal at document body */}
+      {createPortal(
+        <FloatingPanel
+          isOpen={showChatPanel}
+          onClose={() => setShowChatPanel(false)}
+          title="Job Chat"
+          size="medium"
+        >
+          {currentUserId && (
+            <JobChat
+              jobId={job.id}
+              jobStatus={job.status}
+              currentUserId={currentUserId}
+              jobOwnerId={job.user_id}
+              assignedGenieId={job.assigned_genie}
+              isFloating={true}
+            />
+          )}
+        </FloatingPanel>,
+        document.body,
       )}
 
-      {/* Chat component - shows for job owner or assigned genie */}
-      {currentUserId &&
-        (job.user_id === currentUserId ||
-          job.assigned_genie === currentUserId) && (
-          <JobChat
-            jobId={job.id}
-            jobStatus={job.status}
-            currentUserId={currentUserId}
-            jobOwnerId={job.user_id}
-            assignedGenieId={job.assigned_genie}
-          />
-        )}
+      {/* Floating Map Panel - rendered via portal at document body */}
+      {createPortal(
+        <FloatingPanel
+          isOpen={showMapPanel}
+          onClose={() => setShowMapPanel(false)}
+          title="Job Location"
+          size="large"
+        >
+          {currentUserId && (
+            <LiveLocationMap
+              jobId={job.id}
+              role={role}
+              jobStatus={job.status}
+            />
+          )}
+        </FloatingPanel>,
+        document.body,
+      )}
     </article>
   );
 }
