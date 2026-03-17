@@ -103,6 +103,7 @@ async def get_me(
         "email": None,   # email lives in Supabase Auth, not our DB
         "role": user.role,
         "reward_points": user.reward_points,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
         "is_verified": genie_is_verified,
         "verification_status": verification_status,
     }

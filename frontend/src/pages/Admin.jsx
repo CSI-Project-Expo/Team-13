@@ -532,6 +532,11 @@ export default function Admin() {
               sub: "All roles",
             },
             {
+              label: "Total Genies",
+              value: usersByRole?.genie || 0,
+              sub: "Verified professionals",
+            },
+            {
               label: "Total Jobs",
               value: dashboard?.total_jobs || 0,
               sub: "All statuses",

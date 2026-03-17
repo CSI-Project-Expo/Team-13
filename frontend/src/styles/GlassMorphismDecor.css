@@ -1,0 +1,95 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   GLASS MORPHISM DECORATIVE ELEMENTS
+   Frosted glass cards with floating animations and 3D transforms
+   ───────────────────────────────────────────────────────────────────────── */
+
+.glass-morphism-card {
+  will-change: transform;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.08));
+  transition: filter 0.4s ease;
+}
+
+.glass-morphism-card:hover {
+  filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.12));
+}
+
+/* ─── Floating Animation ────────────────────────────────────────────────── */
+
+@keyframes float-glass {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0px) rotateZ(-2deg);
+    filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.08));
+  }
+  25% {
+    transform: translate(-50%, -50%) translateY(-15px) rotateZ(-1deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-25px) rotateZ(1deg);
+    filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.12));
+  }
+  75% {
+    transform: translate(-50%, -50%) translateY(-15px) rotateZ(2deg);
+  }
+}
+
+/* ─── Glass Effect Enhancement ──────────────────────────────────────────── */
+
+.glass-morphism-card > div {
+  /* Smooth interior transitions */
+  transition:
+    box-shadow 0.4s ease,
+    filter 0.4s ease;
+}
+
+/* ─── Responsive Adjustments ────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .glass-morphism-card {
+    filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.06));
+  }
+
+  .glass-morphism-card:hover {
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.08));
+  }
+}
+
+@media (max-width: 768px) {
+  .glass-morphism-card {
+    filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.04));
+  }
+
+  /* Reduce animation intensity on mobile */
+  @keyframes float-glass {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) translateY(0px);
+      filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.04));
+    }
+    50% {
+      transform: translate(-50%, -50%) translateY(-10px);
+      filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.06));
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .glass-morphism-card {
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.02));
+  }
+
+  .glass-morphism-card:hover {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.04));
+  }
+}
+
+/* ─── Texture & Depth Enhancement ──────────────────────────────────────── */
+
+.glass-morphism-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: "radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%)";
+  pointer-events: none;
+  z-index: 1;
+}

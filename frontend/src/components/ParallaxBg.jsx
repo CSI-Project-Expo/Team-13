@@ -63,46 +63,4 @@ export default function ParallaxBg() {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
     }, []);
-
-    return (
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-            {/* Shape 1 — Circle, yellow, top-left, moves slowest */}
-            <div ref={shape1Ref} style={{
-                position: 'absolute',
-                top: '12%', left: '10%',
-                width: 160, height: 160,
-                borderRadius: '50%',
-                background: 'var(--neo-yellow)',
-                border: '2.5px solid var(--border)',
-                opacity: 0.35,
-                willChange: 'transform',
-                transform: 'translate(-50%, -50%)',
-            }} />
-
-            {/* Shape 2 — Square, pink, bottom-right, medium speed */}
-            <div ref={shape2Ref} style={{
-                position: 'absolute',
-                bottom: '8%', right: '5%',
-                width: 120, height: 120,
-                borderRadius: 'var(--radius-sm)',
-                background: 'var(--neo-pink)',
-                border: '2.5px solid var(--border)',
-                opacity: 0.3,
-                willChange: 'transform',
-            }} />
-
-            {/* Shape 3 — Small circle, teal, center, moves fastest */}
-            <div ref={shape3Ref} style={{
-                position: 'absolute',
-                top: '55%', left: '60%',
-                width: 90, height: 90,
-                borderRadius: '50%',
-                background: 'var(--neo-blue)',
-                border: '2.5px solid var(--border)',
-                opacity: 0.3,
-                willChange: 'transform',
-                transform: 'translate(-50%, -50%)',
-            }} />
-        </div>
-    );
 }

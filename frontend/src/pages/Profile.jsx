@@ -692,7 +692,11 @@ export default function Profile() {
 
         <StatsSection
           stats={[
-            { label: "Member Since", value: memberSince, sub: "Joined Do4U" },
+            {
+              label: "Member Since",
+              value: memberSince || "—",
+              sub: "Joined Do4U",
+            },
             { label: "Account Status", value: "Active", sub: roleLabel },
             {
               label: "Total Rating",
