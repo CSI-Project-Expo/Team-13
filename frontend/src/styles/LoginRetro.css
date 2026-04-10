@@ -649,3 +649,51 @@
     transform-origin: center bottom;
   }
 }
+
+@media (max-width: 640px) {
+  .retro-login-page {
+    padding: 12px;
+    align-items: stretch;
+  }
+
+  .retro-login-shell {
+    width: 100%;
+    border-radius: 14px;
+    box-shadow: 6px 6px 0 #1e1e2f20;
+    min-height: auto;
+  }
+
+  /* Hide doodle panel on mobile, keep form focused */
+  .retro-login-art {
+    display: none;
+  }
+
+  .retro-login-card-wrap {
+    padding: 12px;
+    background: #f7f4ef;
+  }
+
+  .retro-login-card {
+    width: 100%;
+    border-radius: 14px;
+    padding: 20px 16px 16px;
+    box-shadow: 6px 6px 0 #1e1e2f24;
+  }
+
+  .retro-login-title {
+    font-size: 24px;
+  }
+
+  .retro-login-subtitle {
+    margin-bottom: 12px;
+  }
+
+  .retro-form-input {
+    font-size: 16px;
+  }
+
+  .retro-submit-btn,
+  .retro-google-btn {
+    min-height: 44px;
+  }
+}
