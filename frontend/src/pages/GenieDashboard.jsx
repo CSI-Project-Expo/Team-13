@@ -7,7 +7,6 @@ import Loader from "../components/Loader";
 import EmptyState from "../components/EmptyState";
 import RatingModal from "../components/RatingModal";
 import StatsSection from "../components/StatsSection";
-import TipsSection from "../components/TipsSection";
 import Footer from "../components/Footer";
 import ButtonSpinner from "../components/ButtonSpinner";
 import logo from "../assets/your-logo.png";
@@ -363,36 +362,6 @@ export default function GenieDashboard() {
             )}
           </div>
         )}
-
-        <TipsSection
-          title="💡 Tips for Success as a Genie"
-          tips={[
-            {
-              icon: "⚡",
-              title: "Complete Profile",
-              description:
-                "A complete profile with skills and verification increases your chances of getting hired",
-            },
-            {
-              icon: "⏱️",
-              title: "Quick Response",
-              description:
-                "Respond to job offers quickly — acceptances within 2 hours have higher success rates",
-            },
-            {
-              icon: "⭐",
-              title: "Quality Work",
-              description:
-                "Deliver excellent work and maintain high ratings to attract better job opportunities",
-            },
-            {
-              icon: "💬",
-              title: "Professional Communication",
-              description:
-                "Clear communication with job posters leads to better ratings and repeat business",
-            },
-          ]}
-        />
 
         {/* Mobile Bottom Navigation */}
         <nav className="mobile-nav">

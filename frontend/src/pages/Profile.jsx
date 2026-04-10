@@ -5,7 +5,6 @@ import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import Navbar from "../components/Navbar";
 import StatsSection from "../components/StatsSection";
-import TipsSection from "../components/TipsSection";
 import Footer from "../components/Footer";
 import Loader from "../components/Loader";
 
@@ -708,35 +707,6 @@ export default function Profile() {
           ]}
         />
 
-        <TipsSection
-          title="💡 Tips to Improve Your Profile"
-          tips={[
-            {
-              icon: "📸",
-              title: "Use a Clear Avatar",
-              description:
-                "A professional avatar helps build trust and improves response rates from other users",
-            },
-            {
-              icon: "✍️",
-              title: "Complete Your Bio",
-              description:
-                "Add detailed information about your skills, experience, and work style",
-            },
-            {
-              icon: "⭐",
-              title: "Maintain High Ratings",
-              description:
-                "Consistently delivering quality work builds your reputation on the platform",
-            },
-            {
-              icon: "🔒",
-              title: "Keep Account Secure",
-              description:
-                "Use a strong password and enable any available security features",
-            },
-          ]}
-        />
       </main>
 
       <Footer />

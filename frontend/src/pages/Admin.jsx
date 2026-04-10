@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import Navbar from "../components/Navbar";
 import StatsSection from "../components/StatsSection";
-import TipsSection from "../components/TipsSection";
 import Footer from "../components/Footer";
 import StatusBadge from "../components/StatusBadge";
 import Loader from "../components/Loader";
@@ -545,36 +544,6 @@ export default function Admin() {
               label: "Pending Verifications",
               value: dashboard?.pending_verifications_count || 0,
               sub: "Awaiting review",
-            },
-          ]}
-        />
-
-        <TipsSection
-          title="💡 Admin Best Practices"
-          tips={[
-            {
-              icon: "🔍",
-              title: "Regular Audits",
-              description:
-                "Periodically review user reports and verify genie credentials to maintain platform trust",
-            },
-            {
-              icon: "⚡",
-              title: "Monitor Platform Health",
-              description:
-                "Check job completion rates, user ratings, and system performance to identify issues early",
-            },
-            {
-              icon: "🛡️",
-              title: "Enforce Safe Practices",
-              description:
-                "Ensure all transactions meet safety requirements and user data privacy is protected",
-            },
-            {
-              icon: "📊",
-              title: "Review Analytics",
-              description:
-                "Use the overview tab to track platform growth, user distribution, and job trends",
             },
           ]}
         />

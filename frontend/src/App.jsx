@@ -11,76 +11,80 @@ import CreateJob from "./pages/CreateJob";
 import Wallet from "./pages/Wallet";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import AlladinChatbot from "./components/AlladinChatbot";
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <NotificationProvider>
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<RoleSelect />} />
-            <Route path="/login" element={<Login />} />
+          <>
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<RoleSelect />} />
+              <Route path="/login" element={<Login />} />
 
-            {/* USER only */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute roles={["user", "admin"]}>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/create-job"
-              element={
-                <ProtectedRoute roles={["user", "admin"]}>
-                  <CreateJob />
-                </ProtectedRoute>
-              }
-            />
+              {/* USER only */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute roles={["user", "admin"]}>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-job"
+                element={
+                  <ProtectedRoute roles={["user", "admin"]}>
+                    <CreateJob />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* GENIE only */}
-            <Route
-              path="/genie-dashboard"
-              element={
-                <ProtectedRoute roles={["genie", "admin"]}>
-                  <GenieDashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* GENIE only */}
+              <Route
+                path="/genie-dashboard"
+                element={
+                  <ProtectedRoute roles={["genie", "admin"]}>
+                    <GenieDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* All authenticated roles */}
-            <Route
-              path="/wallet"
-              element={
-                <ProtectedRoute roles={["user", "genie"]}>
-                  <Wallet />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute roles={["user", "genie", "admin"]}>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+              {/* All authenticated roles */}
+              <Route
+                path="/wallet"
+                element={
+                  <ProtectedRoute roles={["user", "genie"]}>
+                    <Wallet />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute roles={["user", "genie", "admin"]}>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* ADMIN only */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
+              {/* ADMIN only */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <Admin />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <AlladinChatbot />
+          </>
         </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>

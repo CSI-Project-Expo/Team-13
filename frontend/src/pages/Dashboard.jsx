@@ -7,7 +7,6 @@ import JobCard from "../components/JobCard";
 import Loader from "../components/Loader";
 import EmptyState from "../components/EmptyState";
 import StatsSection from "../components/StatsSection";
-import TipsSection from "../components/TipsSection";
 import Footer from "../components/Footer";
 
 const STATUS_FILTERS = [
@@ -186,37 +185,6 @@ export default function Dashboard() {
             }
           />
         )}
-
-        {/* Tips Section */}
-        <TipsSection
-          title="💡 Tips for Success"
-          tips={[
-            {
-              icon: "📝",
-              title: "Be Specific",
-              description:
-                "Detailed descriptions get better responses from Genies faster",
-            },
-            {
-              icon: "💰",
-              title: "Fair Pricing",
-              description:
-                "Set competitive budgets to attract quality Genies quickly",
-            },
-            {
-              icon: "⏱️",
-              title: "Quick Response",
-              description:
-                "Reply to Genie offers within 2 hours for better acceptance rates",
-            },
-            {
-              icon: "⭐",
-              title: "Leave Ratings",
-              description:
-                "Help the community by rating completed jobs accurately",
-            },
-          ]}
-        />
 
         {/* Mobile Bottom Navigation */}
         <nav className="mobile-nav">
