@@ -25,7 +25,7 @@ export default function JobCard({
 }) {
   const { role } = useAuth();
   const [showChatPanel, setShowChatPanel] = useState(false);
-  const [showMapPanel, setShowMapPanel] = useState(false);
+  const [showLocationPanel, setShowLocationPanel] = useState(false);
   const price =
     job.price != null ? `₹${Number(job.price).toFixed(2)}` : "Negotiable";
   const date = job.created_at
@@ -38,14 +38,27 @@ export default function JobCard({
 
   // Show live location only when job is in progress
   const showLiveLocation = job.status === "IN_PROGRESS";
+  const hasStaticLocation = Boolean(job.location?.trim());
+  const showLocationButton =
+    hasStaticLocation || (showLiveLocation && currentUserId);
+
+  const mapsSearchUrl = hasStaticLocation
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.location)}`
+    : "";
 
   return (
     <article className="job-card">
       <div className="job-card__header">
         <div>
           <h3 className="job-card__title">{job.title}</h3>
-          {job.location && (
-            <span className="job-card__location">📍 {job.location}</span>
+          {showLocationButton && (
+            <button
+              type="button"
+              className="job-card__location-btn"
+              onClick={() => setShowLocationPanel(true)}
+            >
+              📍 Location
+            </button>
           )}
         </div>
         <StatusBadge status={job.status} />
@@ -113,17 +126,6 @@ export default function JobCard({
 
       {/* Floating action buttons for map and chat */}
       <div className="job-card__floating-actions">
-        {/* Map button - shows for active jobs when genie is assigned */}
-        {showLiveLocation && currentUserId && (
-          <button
-            className="btn btn--sm btn--ghost"
-            onClick={() => setShowMapPanel(true)}
-            title="View job location"
-          >
-            🗺️ Location
-          </button>
-        )}
-
         {/* Chat button - shows for job owner or assigned genie */}
         {currentUserId &&
           (job.user_id === currentUserId ||
@@ -143,7 +145,7 @@ export default function JobCard({
         <FloatingPanel
           isOpen={showChatPanel}
           onClose={() => setShowChatPanel(false)}
-          title="Job Chat"
+          title="Job chat"
           size="medium"
         >
           {currentUserId && (
@@ -154,27 +156,45 @@ export default function JobCard({
               jobOwnerId={job.user_id}
               assignedGenieId={job.assigned_genie}
               isFloating={true}
+              onClosePanel={() => setShowChatPanel(false)}
             />
           )}
         </FloatingPanel>,
         document.body,
       )}
 
-      {/* Floating Map Panel - rendered via portal at document body */}
+      {/* Location pop-up: address + live map when in progress */}
       {createPortal(
         <FloatingPanel
-          isOpen={showMapPanel}
-          onClose={() => setShowMapPanel(false)}
-          title="Job Location"
+          isOpen={showLocationPanel}
+          onClose={() => setShowLocationPanel(false)}
+          title="Job location"
           size="large"
         >
-          {currentUserId && (
-            <LiveLocationMap
-              jobId={job.id}
-              role={role}
-              jobStatus={job.status}
-            />
-          )}
+          <div className="job-location-panel">
+            {hasStaticLocation && (
+              <div className="job-location-panel__address">
+                <p className="job-location-panel__label">Address</p>
+                <p className="job-location-panel__text">{job.location}</p>
+                <a
+                  className="btn btn--sm btn--ghost job-location-panel__maps-link"
+                  href={mapsSearchUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open in Google Maps →
+                </a>
+              </div>
+            )}
+            {showLiveLocation && currentUserId && (
+              <LiveLocationMap
+                jobId={job.id}
+                role={role}
+                jobStatus={job.status}
+                embeddedInPanel
+              />
+            )}
+          </div>
         </FloatingPanel>,
         document.body,
       )}

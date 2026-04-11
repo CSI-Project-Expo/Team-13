@@ -6,7 +6,8 @@ export default function JobChat({
   currentUserId,
   jobOwnerId,
   assignedGenieId,
-  isFloating = false, // New prop to indicate floating mode
+  isFloating = false,
+  onClosePanel,
 }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -213,6 +214,21 @@ export default function JobChat({
             {isConnected ? "● Connected" : "○ Connecting..."}
           </span>
         </div>
+
+        {typeof onClosePanel === "function" && (
+          <div className="job-chat__modal-footer">
+            <button
+              type="button"
+              className="btn btn--ghost btn--full"
+              onClick={onClosePanel}
+            >
+              Close chat
+            </button>
+            <p className="job-chat__modal-hint">
+              You can also press ✕ above or Escape to close.
+            </p>
+          </div>
+        )}
       </div>
     );
   }

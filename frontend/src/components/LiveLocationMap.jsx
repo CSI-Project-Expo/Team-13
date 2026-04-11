@@ -28,10 +28,15 @@ const dedupedFetch = async (url) => {
  * @param {string} role - 'genie' or 'user'
  * @param {string} jobStatus - Current job status
  */
-export default function LiveLocationMap({ jobId, role, jobStatus }) {
+export default function LiveLocationMap({
+  jobId,
+  role,
+  jobStatus,
+  embeddedInPanel = false,
+}) {
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(embeddedInPanel);
   const [isSharing, setIsSharing] = useState(false);
   const pollIntervalRef = useRef(null);
   const isMountedRef = useRef(false);
@@ -210,7 +215,7 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     if (
       role === "user" &&
       isTrackingActive &&
-      isExpanded &&
+      (isExpanded || embeddedInPanel) &&
       isMountedRef.current
     ) {
       // Delay initial fetch to prevent resource spike on page load
@@ -234,7 +239,11 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
         }
       };
     }
-  }, [role, isTrackingActive, isExpanded, fetchLocation]);
+  }, [role, isTrackingActive, isExpanded, embeddedInPanel, fetchLocation]);
+
+  useEffect(() => {
+    if (embeddedInPanel) setIsExpanded(true);
+  }, [embeddedInPanel]);
 
   // Genie sharing - active during IN_PROGRESS (independent of panel expansion)
   useEffect(() => {
@@ -287,6 +296,94 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     return null;
   }
 
+  const mapBlock = (
+    <>
+      <div className="live-location-map__frame">
+        {location ? (
+          <>
+            <iframe
+              src={getEmbeddedMapUrl()}
+              title="Live Google Map"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="live-location-map__iframe"
+            />
+            <a
+              href={getFullMapUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="live-location-map__open-maps btn btn--sm"
+            >
+              Open Map →
+            </a>
+          </>
+        ) : (
+          <p className="live-location-map__waiting">
+            {role === "genie" ? "Waiting for GPS..." : "Waiting for genie..."}
+          </p>
+        )}
+      </div>
+
+      <div className="live-location-map__meta">
+        {location ? (
+          <>
+            <span>
+              Lat: {location.latitude?.toFixed(6)}
+            </span>
+            <span>
+              Lng: {location.longitude?.toFixed(6)}
+            </span>
+            {location.accuracy && (
+              <span className="live-location-map__meta-muted">
+                ±{Math.round(location.accuracy)}m
+              </span>
+            )}
+            {getLastUpdated() && (
+              <span className="live-location-map__meta-updated">
+                Updated: {getLastUpdated()}
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="live-location-map__meta-muted">
+            Location not available...
+          </span>
+        )}
+      </div>
+
+      {error && <div className="live-location-map__error">⚠️ {error}</div>}
+
+      {role === "genie" && (
+        <div className="live-location-map__actions">
+          <button
+            type="button"
+            onClick={startSharing}
+            className="btn btn--sm btn--primary"
+          >
+            📍 Update location
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  if (embeddedInPanel) {
+    return (
+      <div className="live-location-map live-location-map--embedded">
+        <div className="live-location-map__panel-head">
+          <div className="live-location-map__panel-head-main">
+            <span className="live-location-map__panel-icon">📍</span>
+            <span className="live-location-map__panel-title">
+              {role === "genie" ? "Your live GPS" : "Genie live location"}
+            </span>
+            {location && <span className="live-location-map__live-dot" />}
+          </div>
+        </div>
+        {mapBlock}
+      </div>
+    );
+  }
+
   // Collapsed view - just a button
   if (!isExpanded) {
     return (
@@ -335,188 +432,26 @@ export default function LiveLocationMap({ jobId, role, jobStatus }) {
     );
   }
 
-  // Expanded view with map
   return (
-    <div
-      style={{
-        marginTop: 12,
-        padding: 16,
-        background: "var(--surface)",
-        border: "2.5px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        boxShadow: "3px 3px 0 var(--border)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 12,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 18 }}>📍</span>
-          <span
-            style={{
-              fontWeight: 700,
-              fontSize: 14,
-              textTransform: "uppercase",
-            }}
-          >
+    <div className="live-location-map live-location-map--inline">
+      <div className="live-location-map__panel-head">
+        <div className="live-location-map__panel-head-main">
+          <span className="live-location-map__panel-icon">📍</span>
+          <span className="live-location-map__panel-title">
             {role === "genie" ? "Your Location" : "Genie Location"}
           </span>
-          {location && (
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: "#22c55e",
-                animation: "pulse 2s infinite",
-              }}
-            />
-          )}
+          {location && <span className="live-location-map__live-dot" />}
         </div>
         <button
+          type="button"
+          className="live-location-map__collapse"
           onClick={() => setIsExpanded(false)}
-          style={{
-            background: "none",
-            border: "none",
-            fontSize: 18,
-          }}
+          aria-label="Collapse map"
         >
           ▲
         </button>
       </div>
-
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          height: 250,
-          borderRadius: "var(--radius-sm)",
-          overflow: "hidden",
-          border: "2px solid var(--border)",
-          background: "#e5e7eb",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {location ? (
-          <>
-            <iframe
-              src={getEmbeddedMapUrl()}
-              title="Live Google Map"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              style={{
-                display: "block",
-                width: "100%",
-                height: "100%",
-                border: 0,
-              }}
-            />
-            <a
-              href={getFullMapUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                position: "absolute",
-                bottom: 8,
-                right: 8,
-                background: "var(--neo-yellow)",
-                border: "2px solid var(--border)",
-                borderRadius: "var(--radius-sm)",
-                padding: "6px 12px",
-                fontSize: 12,
-                fontWeight: 700,
-                textDecoration: "none",
-                color: "var(--text)",
-                boxShadow: "2px 2px 0 var(--border)",
-              }}
-            >
-              Open Map →
-            </a>
-          </>
-        ) : (
-          <p style={{ color: "var(--text-muted)", fontWeight: 600 }}>
-            {role === "genie" ? "Waiting for GPS..." : "Waiting for genie..."}
-          </p>
-        )}
-      </div>
-
-      <div
-        style={{
-          marginTop: 12,
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 16,
-          fontSize: 12,
-        }}
-      >
-        {location ? (
-          <>
-            <span style={{ fontWeight: 600 }}>
-              Lat: {location.latitude?.toFixed(6)}
-            </span>
-            <span style={{ fontWeight: 600 }}>
-              Lng: {location.longitude?.toFixed(6)}
-            </span>
-            {location.accuracy && (
-              <span style={{ color: "var(--text-muted)" }}>
-                ±{Math.round(location.accuracy)}m
-              </span>
-            )}
-            {getLastUpdated() && (
-              <span style={{ color: "var(--text-muted)", marginLeft: "auto" }}>
-                Updated: {getLastUpdated()}
-              </span>
-            )}
-          </>
-        ) : (
-          <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>
-            Location not available...
-          </span>
-        )}
-      </div>
-
-      {error && (
-        <div
-          style={{
-            marginTop: 12,
-            padding: 8,
-            background: "#fee2e2",
-            border: "2px solid #ef4444",
-            borderRadius: "var(--radius-sm)",
-            fontSize: 12,
-            color: "#dc2626",
-            fontWeight: 600,
-          }}
-        >
-          ⚠️ {error}
-        </div>
-      )}
-
-      {role === "genie" && (
-        <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-          <button
-            onClick={startSharing}
-            className="btn btn--sm"
-            style={{
-              background: "var(--neo-green)",
-              border: "2px solid var(--border)",
-              fontSize: 12,
-            }}
-          >
-            � Update Location
-          </button>
-        </div>
-      )}
-
-      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }`}</style>
+      {mapBlock}
     </div>
   );
 }

@@ -1172,6 +1172,338 @@ select {
   font-weight: 600;
 }
 
+.job-card__location-btn {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  cursor: var(--hover-cursor);
+  transition: var(--transition);
+}
+
+.job-card__location-btn:hover {
+  background: var(--neo-yellow);
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.job-card__floating-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: var(--border-w) solid var(--border);
+}
+
+.job-card__floating-actions .btn {
+  flex: 0 1 auto;
+  min-width: 100px;
+}
+
+/* ── Modal: job location + job chat (FloatingPanel) ─────── */
+.floating-panel__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 46, 0.55);
+  z-index: 1300;
+  animation: fadeIn 0.2s ease;
+}
+
+.floating-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  z-index: 1301;
+  display: flex;
+  flex-direction: column;
+  max-height: min(90vh, 720px);
+  animation: panelSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.floating-panel--small {
+  width: min(400px, 94vw);
+}
+
+.floating-panel--medium {
+  width: min(560px, 94vw);
+}
+
+.floating-panel--large {
+  width: min(720px, 94vw);
+}
+
+.floating-panel__header {
+  padding: 16px 18px;
+  background: var(--neo-yellow);
+  border-bottom: var(--border-w) solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  flex-shrink: 0;
+}
+
+.floating-panel__title {
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin: 0;
+}
+
+.floating-panel__close {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  cursor: var(--hover-cursor);
+  transition: var(--transition);
+}
+
+.floating-panel__close:hover {
+  background: var(--accent-light);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.floating-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--bg);
+  min-height: 0;
+}
+
+.job-location-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.job-location-panel__address {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.job-location-panel__label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.job-location-panel__text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.job-location-panel__maps-link {
+  text-decoration: none;
+  width: fit-content;
+}
+
+.live-location-map--embedded {
+  margin-top: 0;
+}
+
+.live-location-map__panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.live-location-map__panel-head-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.live-location-map__panel-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.live-location-map__panel-title {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.live-location-map__live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: liveLocationPulse 2s ease-in-out infinite;
+}
+
+.live-location-map__collapse {
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: var(--hover-cursor);
+  box-shadow: var(--shadow-sm);
+}
+
+.live-location-map--inline {
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.live-location-map__frame {
+  position: relative;
+  width: 100%;
+  height: min(280px, 45vh);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--border-w) solid var(--border);
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.live-location-map__iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.live-location-map__open-maps {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.live-location-map__waiting {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0;
+}
+
+.live-location-map__meta {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.live-location-map__meta-muted {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.live-location-map__meta-updated {
+  color: var(--text-muted);
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.live-location-map__error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--red-light);
+  border: var(--border-w) solid var(--red);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.live-location-map__actions {
+  margin-top: 12px;
+}
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, -46%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0);
+  }
+}
+
+@media (max-width: 640px) {
+  .floating-panel {
+    width: 94vw;
+    max-height: 88vh;
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    transform: translate3d(-50%, 0, 0);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  @keyframes panelSlideIn {
+    from {
+      opacity: 0;
+      transform: translate3d(-50%, 12px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+}
+
 /* ── Auth Pages ──────────────────────────────────────────── */
 
 /* Neo Brutalism background for auth and role-select */
@@ -3014,6 +3346,61 @@ select {
 
 .job-chat__input:disabled {
   opacity: 0.5;
+}
+
+.job-chat__floating-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: min(420px, 55vh);
+}
+
+.job-chat__floating-content .job-chat__messages {
+  flex: 1;
+  min-height: 220px;
+  max-height: min(360px, 45vh);
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.job-chat__floating-content .job-chat__form {
+  border: var(--border-w) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.job-chat__status-indicator {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.job-chat__modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: var(--border-w) dashed var(--border);
+  margin-top: 4px;
+}
+
+.job-chat__modal-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 500;
+}
+
+@keyframes liveLocationPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
 }
 
 /* ── Animated Chat Messages ──────────────────────────────── */
